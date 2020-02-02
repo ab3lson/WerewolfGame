@@ -1,0 +1,8 @@
+Live server log: 
+journalctl -f -u werewolf.service
+
+Better liver server log: 
+journalctl -f -o cat _SYSTEMD_UNIT=werewolf.service
+
+Pull and overwrite:
+git reset --hard && git pull
