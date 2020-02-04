@@ -17,9 +17,15 @@
         <li class="nav-item {{ 'active' if active_page == 'game' else '' }}">
           <a class="nav-link" href="game"><i class="fas fa-gamepad"></i> Play a Game</a>
         </li>
+        {% if session['username'] %}
+        <li class="nav-item pull-right">
+          <a class="nav-link" href="login"><i class="fas fa-user"></i> {{session['username']}}</a>
+        </li>
+        {%else%}
         <li class="nav-item pull-right {{ 'active' if active_page == 'login' else '' }}">
           <a class="nav-link" href="login"><i class="fas fa-sign-in-alt"></i> Login</a>
         </li>
+        {% endif %}
       </ul>
       <ul class="navbar-nav pull-right">
         
