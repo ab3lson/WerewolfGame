@@ -7,6 +7,8 @@ sudo fail2ban-client status
 Unblock an ip:
 sudo fail2ban-client set werewolf-hackers unbanip 73.52.187.223
 
+Test new jails:
+fail2ban-regex --print-all-matched <LOG_LOCATION> <JAIL.CONF in filter.d> | less 
 
 ####
 sometimes the ban will stop working. to fix:
