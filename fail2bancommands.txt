@@ -1,0 +1,8 @@
+Check blocked IPs for a specific JAIL
+sudo fail2ban-client status JAILNAME (eg.werewolf-hackers)
+
+Check running jails:
+sudo fail2ban-client status
+
+Unblock an ip:
+sudo fail2ban-client set werewolf-hackers unbanip 73.52.187.223
