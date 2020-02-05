@@ -6,3 +6,6 @@ journalctl -f -o cat _SYSTEMD_UNIT=werewolf.service
 
 Pull and overwrite:
 git reset --hard && git pull
+
+View entire connection log since last boot:
+journalctl -u werewolf.service
