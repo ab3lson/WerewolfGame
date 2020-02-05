@@ -6,3 +6,14 @@ sudo fail2ban-client status
 
 Unblock an ip:
 sudo fail2ban-client set werewolf-hackers unbanip 73.52.187.223
+
+
+####
+sometimes the ban will stop working. to fix:
+run:
+sudo rm /var/lib/fail2ban/fail2ban.sqlite
+sudp rm /var/log/werewolfTraffic.log 
+then restart the fail2ban service and the werewolf service
+
+Maybe this is because the werewolf traffic log is too long? maybe the database gets old after a while and the service needs to be restarted?
+Try setting this in a cronjob if it reoccurs.
