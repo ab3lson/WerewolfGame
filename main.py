@@ -100,7 +100,8 @@ def joinGame():
 def lobby():
     try:
         if session["loggedIn"]:
-            return render_template("lobby.html",roomId=session["roomId"])
+            #TODO: get people needed from database based on roomId
+            return render_template("lobby.html",roomId=session["roomId"],peopleNeeded=12)
     except Exception as e:
         print("**ERROR in lobby route:",e)
         return redirect("/")

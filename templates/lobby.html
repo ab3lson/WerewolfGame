@@ -29,31 +29,45 @@
 {% include 'navbar.html' %}
 
 <body>
-      <div class="d-flex justify-content-center h-100 mt-4">
+    <div class="d-flex justify-content-center h-100 mt-4">
         <div class="card">
-          <div class="card-header text-center">
-            <h3>Lobby: {{roomId}}</h3>
-          </div>
-          <div class="card-body">
-            <div class="row justify-content-between">
-                <div class="col-4">
-                    <ul id="names">
-                        <li>A person should go here</li>
-                    </ul>
-                </div>
-                <div class="col-4">
-                  <ul id="info">
-                      <li>IDK What Goes Here</li>
-                  </ul>
-                </div>
-              </div>
-          </div>
-          <div class="card-footer">
-            <div class="d-flex justify-content-center links">
-              <span>Want to leave this room?</span><a class="btn-danger ml-3" href="/game" role="button">Leave Room</a>
+            <div class="card-header text-center">
+                <h3>Lobby: {{roomId}}</h3>
+                <h5>People: <span id="currentPeople">1</span>/{{peopleNeeded}}</h5>
             </div>
-          </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="container text-center">
+                        <ul id="names" style="list-style-type:none; margin: 0px; padding: 0px;">
+                            <li>Username#1</li>
+                            <li>Username#2</li>
+                        </ul>
+                    </div>
+                </div>
+                <br><br>
+                <div class="progress">
+                    <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated"
+                        role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-center links">
+                    <span>Want to leave this room?</span><a class="btn-danger ml-3" href="/game" role="button">Leave
+                        Room</a>
+                </div>
+            </div>
         </div>
+    </div>
+    <button id="button">PROGRESS</button>
+    <script>
+        $("#button").click(function () { //call this function when a new person is added or leaves on socket
+            let width = ($("#progressbar").width() / $('#progressbar').parent().width() * 100) + 10;    //change this to do the math from the header
+            $("#progressbar").attr('style', "width: " + width + "%");
+            $("#peopleNeeded").html($("#names li").length);
+        });
+        //when a person joins they need to be appended to the names list and call the above function
+    </script>
 
 </body>
 
