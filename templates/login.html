@@ -20,7 +20,7 @@
 <body>
     {% if session['loggedIn'] %}
     <div class="container">
-        <div class="d-flex justify-content-center h-100">
+        <div class="d-flex justify-content-center h-100 mt-4">
             <div class="card">
                 <div class="card-header">
                     <h3>Sign Out</h3>
@@ -28,14 +28,14 @@
                 <div class="card-body">
                     <form>
                         <div class="input-group form-group">
-                            <a class="btn btn-warning btn-lg mx-auto" href="signout" role="button">Sign Out</a>
+                            <a class="btn btn-danger btn-lg mx-auto" href="signout" role="button">Sign Out</a>
                         </div>
                     </form>
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center">
-                        <span class="btn btn-warning col-auto mr-auto" href="#" role="button"><i class="fas fa-chart-line"></i> Stats</span>
-                        <span class="btn btn-warning col-auto" href="#" role="button"><i class="fas fa-cog"></i> Settings</span>
+                        <a class="btn-success btn-lg col-auto " href="stats" role="button"><i class="fas fa-chart-line"></i> Stats</a>
+                        <a class="btn-info btn-lg col-auto ml-3" href="#" role="button"><i class="fas fa-cog"></i> Settings</a>
                     </div>
                 </div>
             </div>
