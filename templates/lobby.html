@@ -33,14 +33,15 @@
         <div class="card">
             <div class="card-header text-center">
                 <h3>Lobby: {{roomId}}</h3>
-                <h5>People: <span id="currentPeople">1</span>/{{peopleNeeded}}</h5>
+                <h5>People: <span id="currentPlayers">{{currentPlayers}}</span>/{{playersNeeded}}</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="container text-center">
                         <ul id="names" style="list-style-type:none; margin: 0px; padding: 0px;">
-                            <li>Username#1</li>
-                            <li>Username#2</li>
+                            {% for player in playerNames %}
+                            <li>{{ player }}</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
@@ -53,7 +54,8 @@
             </div>
             <div class="card-footer">
                 <div class="d-flex justify-content-center links">
-                    <span>Want to leave this room?</span><a class="btn-danger ml-3" href="/game" role="button">Leave
+                    <span>Want to leave this room?</span><a class="btn-danger ml-3" href="/leaveLobby"
+                        role="button">Leave
                         Room</a>
                 </div>
             </div>
@@ -61,12 +63,11 @@
     </div>
     <button id="button">PROGRESS</button>
     <script>
-        $("#button").click(function () { //call this function when a new person is added or leaves on socket
-            let width = ($("#progressbar").width() / $('#progressbar').parent().width() * 100) + 10;    //change this to do the math from the header
-            $("#progressbar").attr('style', "width: " + width + "%");
-            $("#peopleNeeded").html($("#names li").length);
+        $(document).ready(function () { //also call when new player joins event with socketio
+            let progress = {{currentPlayers}}/{{playersNeeded}}
+            $("#progressbar").attr('style', "width: " + (progress * 100) + "%");
         });
-        //when a person joins they need to be appended to the names list and call the above function
+
     </script>
 
 </body>

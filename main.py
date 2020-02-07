@@ -7,6 +7,8 @@ import os, string, random
 app = Flask(__name__)
 app.secret_key = "WEareBYUstudents!"
 
+GAMES = [] #holds all active games with "roomId" and "players" - list of players
+
 def roomGenerator(size=4, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -76,7 +78,10 @@ def createGame():
             print("Variables from form:\nDecision in seconds:",decisionSeconds,"\nPlayers needed:", request.form["playersNeeded"])
             print("*****************")
             ##TODO: get values and create lobby in database
-            roomId = session["roomId"]
+            newGame = {"roomId":session["roomId"],"players":[session["username"]],"playersNeeded":request.form["playersNeeded"],"decisionTimer":decisionSeconds}
+            GAMES.append(newGame)
+            print("Making new game:",newGame)
+            print("All active games:",GAMES)
             return redirect("lobby")
     except Exception as e:
         print("**ERROR in create game:",e)
@@ -87,11 +92,16 @@ def joinGame():
     try:
         if session["loggedIn"]:
             #TODO: add if statement to see if roomId is in the database. if it is then join it, if not redirect and display error on play.html
-            session["roomId"] = request.form["roomId"]
-            print("****************")
-            print("The user {} is joining the lobby: {}\n***************".format(session["username"]),session["roomId"])
-            roomId = session["roomId"]
-            return redirect("lobby")
+            for game in GAMES:
+                if request.form["roomId"] == game["roomId"]:
+                    session["roomId"] = request.form["roomId"]
+                    game["players"].append(session["username"])
+                    print("****************")
+                    print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
+                    roomId = session["roomId"]                            
+                    return redirect("lobby")
+            print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
+            return redirect("/game")          
     except Exception as e:
         print("**ERROR in join game:",e)
         return redirect("/")
@@ -99,11 +109,43 @@ def joinGame():
 @app.route("/lobby")
 def lobby():
     try:
-        if session["loggedIn"]:
-            #TODO: get people needed from database based on roomId
-            return render_template("lobby.html",roomId=session["roomId"],peopleNeeded=12)
+        if session["loggedIn"] and session["roomId"]:
+            playersNeeded = 0
+            currentPlayers = 0
+            gameDict = None
+            for game in GAMES:
+                if game["roomId"] == session["roomId"]:
+                    currentPlayers=len(game["players"])
+                    playersNeeded=game["playersNeeded"]
+                    gameDict = game
+            return render_template("lobby.html",roomId=session["roomId"],currentPlayers=currentPlayers,playersNeeded=playersNeeded,playerNames=gameDict["players"])
     except Exception as e:
         print("**ERROR in lobby route:",e)
+        return redirect("/")
+
+@app.route("/leaveLobby")
+def leaveLobby():
+    try:
+        if session["loggedIn"] and session["roomId"]:
+            print("****************")
+            for game in GAMES:
+                if game["roomId"] == session["roomId"]:
+                    for user in game["players"]:
+                        if user == session["username"]:
+                            game["players"].remove(user)
+                            print("The user {} left the lobby: {}".format(session["username"],session["roomId"]))
+                            #TODO: remove user from active game and decrement player count in database
+                    print("Players left in the lobby:",len(game["players"]))
+                    if len(game["players"]) == 0:
+                        print("Nobody is in the lobby: {}. Deleting the lobby.".format(session["roomId"]))
+                        GAMES.remove(game)
+                        print("Remaining lobbies:",GAMES)
+                        #TODO: remove roomId lobby in database
+            session.pop('roomId', None)
+            print("***************")
+            return redirect("/game")
+    except Exception as e:
+        print("**ERROR in leaveLobby route:",e)
         return redirect("/")
 
 @app.route("/create")
