@@ -60,6 +60,21 @@ def signup():
     except:
         return render_template("signup.html")
 
+@app.route("/createAccount",methods=['POST'])
+def createAccount():
+    try:
+        if session["loggedIn"]:
+            return redirect("/")
+    except:
+        if request.form["password"] != request.form["confirmPassword"]:
+            return render_template("signup.html",error="badPassword")
+        #also add if statement if username already exists
+
+    print(request.form)
+    session["username"] = request.form["username"]
+    session['loggedIn'] = 1
+    return redirect("game")
+
 @app.route("/game")
 def game():
     try:

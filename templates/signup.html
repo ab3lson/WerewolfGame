@@ -23,37 +23,47 @@
         <div class="card">
             <article class="card-body mx-auto">
                 <h4 class="card-header">Create Account</h4>
+                {% if error %}
+                <div class="alert alert-dismissible alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {% if error=="badPassword" %}
+                        <strong>Passwords did not match!</strong>
+                    {% elif error=="usernameTaken" %}
+                        <strong>That username is already taken!</strong>
+                    {% endif %}
+                  </div>
+                {% endif %}
                 <p class="text-center">Get started with your free account</p>
-                <form>
+                <form action="createAccount" method="POST">
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                         </div>
-                        <input name="" class="form-control" placeholder="Full name" type="text">
+                        <input required class="form-control" placeholder="Full name" name="fullName" type="text">
                     </div> <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
                         </div>
-                        <input name="" class="form-control" placeholder="Email address" type="email">
+                        <input class="form-control" placeholder="Email address" name="email" type="email">
                     </div> <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-user-secret"></i> </span>
                         </div>
-                        <input name="" class="form-control" placeholder="Username" type="text">
+                        <input required maxlength="16" class="form-control" placeholder="Username" name="username" type="text">
                     </div> <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                         </div>
-                        <input class="form-control" placeholder="Create password" type="password">
+                        <input required maxlength="32" class="form-control" placeholder="Create password" name="password" type="password">
                     </div> <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                         </div>
-                        <input class="form-control" placeholder="Repeat password" type="password">
+                        <input required maxlength="32" class="form-control" placeholder="Repeat password" name="confirmPassword" type="password">
                     </div> <!-- form-group// -->
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary btn-block"> Create Account </button>
