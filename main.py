@@ -12,7 +12,6 @@ GAMES = [] #holds all active games with "roomId" and "players" - list of players
 def roomGenerator(size=4, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
@@ -83,6 +82,14 @@ def game():
     except:
         return redirect("/")
 
+@app.route("/create")
+def create():
+    try:
+        if session["loggedIn"]:
+            return render_template("create.html")
+    except:
+        return redirect("/login")
+
 @app.route("/createGame",methods=['POST'])
 def createGame():
     try:
@@ -147,7 +154,10 @@ def lobby():
                     currentPlayers=len(game["players"])
                     playersNeeded=game["playersNeeded"]
                     gameDict = game
-            return render_template("lobby.html",roomId=session["roomId"],currentPlayers=currentPlayers,playersNeeded=playersNeeded,playerNames=gameDict["players"])
+            if currentPlayers == playersNeeded:
+                pass #TODO: emit a message to all players in the lobby and redirect them to /pregame where roles get assigned
+            else:
+                return render_template("lobby.html",roomId=session["roomId"],currentPlayers=currentPlayers,playersNeeded=playersNeeded,playerNames=gameDict["players"])
     except Exception as e:
         print("**ERROR in lobby route:",e)
         return redirect("/")
@@ -177,17 +187,56 @@ def leaveLobby():
         print("**ERROR in leaveLobby route:",e)
         return redirect("/")
 
-@app.route("/create")
-def create():
-    try:
-        if session["loggedIn"]:
-            return render_template("create.html")
-    except:
-        return redirect("/login")
+@app.route("/pregame")
+def pregame():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/pregame.html")
+
+@app.route("/intro")
+def intro():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/intro.html")
+
+@app.route("/daytime")
+def daytime():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/daytime.html")
+
+@app.route("/nighttime")
+def nighttime():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/nighttime.html")
+
+@app.route("/vote")
+def vote():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/vote.html")
+
+
 
 @app.errorhandler(404)
 def page_not_found(error):
-   return render_template('404.html', title = '404'), 404
+   return render_template('404.html'), 404
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=3088,debug=True)
