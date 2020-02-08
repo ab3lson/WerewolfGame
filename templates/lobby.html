@@ -38,11 +38,11 @@
             <div class="card-body">
                 <div class="row">
                     <div class="container text-center">
-                        <ul id="names" style="list-style-type:none; margin: 0px; padding: 0px;">
+                        <table id="names" class="table table-hover">
                             {% for player in playerNames %}
-                            <li>{{ player }}</li>
+                            <tr><td>{{ player }}</td></tr>
                             {% endfor %}
-                        </ul>
+                        </table>
                     </div>
                 </div>
                 <br><br>

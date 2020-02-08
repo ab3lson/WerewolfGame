@@ -72,6 +72,13 @@ def game():
 def createGame():
     try:
         if session["loggedIn"]:
+            try:
+                if session["roomId"]:
+                    print("*************\nThe user {} tried to make a new room, but they are already in room {}!".format(session["username"],session["roomId"]))
+                    print("Removing old roomId to create a new room.\n***************")
+                    session.pop('roomId', None)
+            except:
+                pass #the user is not already in a room
             decisionSeconds = int(request.form["decisionTimer"])*60
             session["roomId"] = roomGenerator()
             print("*****************\nROOM ID GENERATED: {}".format(session["roomId"]))
@@ -90,6 +97,13 @@ def createGame():
 @app.route("/joinGame", methods=['POST'])
 def joinGame():
     try:
+        try:
+            if session["roomId"]:
+                print("*************\nThe user {} is tried to join room {}, but they are already in room {}!".format(session["username"],request.form["roomId"],session["roomId"]))
+                print("Removing old roomId to join a new room.\n***************")
+                session.pop('roomId', None)
+        except:
+            pass #the user is not already in a room
         if session["loggedIn"]:
             #TODO: add if statement to see if roomId is in the database. if it is then join it, if not redirect and display error on play.html
             for game in GAMES:

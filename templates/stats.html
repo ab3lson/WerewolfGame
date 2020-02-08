@@ -2,61 +2,89 @@
 <html lang="en">
 
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/static/css/bootstrap.css">
-    <link rel="stylesheet" href="/static/css/custom.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
-    <title>Stats</title>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <title>Stats</title>
 </head>
 {% set active_page = "game" %}
 {% include 'navbar.html' %}
 
 <body>
-    <div class="d-flex justify-content-center h-100 mt-4">
-        <div class="card">
-          <div class="card-header text-center">
-            <h3><i class="fas fa-chart-line"></i> Stats</h3>
-          </div>
-          <div class="card-body">
-            <div class="container text-center">
-                <div class="col-12">
-                    <ul id="stats" style="list-style-type:none; margin: 0px; padding: 0px;">
-                        <li>Games Played:  <span id="gamesPlayed">0</span></li>
-                        <li>Games Won:  <span id="gamesWon">0</span></li>
-                        <li>Games Win Ratio:  <span id="winRatio">0</span></li>
-                        <li>People Saved:  <span id="peopleSaved">0</span></li>
-                        <li>People Eaten:  <span id="peopleEaten">0</span></li>
-                        <li>Times Werewolf:  <span id="timesWerewolf">0</span></li>
-                        <li>Times Doctor:  <span id="timesDoctor">0</span></li>
-                        <li>Times Seer:  <span id="timesSeer">0</li></li>
-                        <li>Times Hunter:  <span id="timesHunter">0</span></li>
-                    </ul>
-                </div>
-              </div>
-          </div>
-          <div class="card-footer">
-            <div class="d-flex justify-content-center links">
-              <a class="btn-warning btn-lg" href="/game" role="button">Back</a>
-            </div>
+  <div class="d-flex justify-content-center h-100 mt-4">
+    <div class="card">
+      <div class="card-header text-center">
+        <h3><i class="fas fa-chart-line"></i> Stats</h3>
+      </div>
+      <div class="card-body">
+        <div class="container text-center">
+          <div class="col-12">
+            <table id="stats" class="table table-hover table-striped">
+            <tbody>
+              <tr>
+                <td>Games Played:</td>
+                <td id="gamesPlayed">0</td>
+              </tr>
+              <tr>
+                <td>Games Won:</td>
+                <td id="gamesWon">0</td>
+              </tr>
+              <tr>
+                <td>Win Ratio:</td>
+                <td id="winRatio">0</td>
+              </tr>
+              <tr>
+                <td>People Saved:</td>
+                <td id="peopleSaved">0</td>
+              </tr>
+              <tr>
+                <td>People Eaten:</td>
+                <td id="peopleEaten">0</td>
+              </tr>
+              <td>Times Werewolf:</td>
+              <td id="timesWerewolf">0</td>
+              </tr>
+              <tr>
+                <td>Times Doctor:</td>
+                <td id="timesDoctor">0</td>
+              </tr>
+              <tr>
+                <td>Times Seer:</td>
+                <td id="timesSeer">0</td>
+              </tr>
+              <tr>
+                <td>Times Hunter:</td>
+                <td id="timesHunter">0</td>
+              </tr>
+            </tbody>
+            </table>
           </div>
         </div>
+      </div>
+      <div class="card-footer">
+        <div class="d-flex justify-content-center links">
+          <a class="btn-warning btn-lg" href="/game" role="button">Back</a>
+        </div>
+      </div>
+    </div>
 </body>
 
 </html>
