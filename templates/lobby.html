@@ -66,8 +66,7 @@
     </div>
     <script>
         $(document).ready(function () { //also call when new player joins event with socketio
-            let progress = {{ currentPlayers }
-        } / {{ playersNeeded }}
+            let progress = {{ currentPlayers }} / {{ playersNeeded }}
             $("#progressbar").attr('style', "width: " + (progress * 100) + "%");
         });
 

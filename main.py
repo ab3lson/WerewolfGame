@@ -210,7 +210,8 @@ def joinGame():
                     cur.close()
                     print("****************")
                     print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
-                    roomId = session["roomId"]                            
+                    roomId = session["roomId"]
+                    # socketio.send('player joined a lobby', roomId=roomId)
                     return redirect("lobby")
             print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
@@ -328,6 +329,10 @@ def sessionView():
 @socketio.on('my event')
 def helloWorld(json):
     print('I found a socket!',json)
+
+@socketio.on('player joined a lobby')
+def lobbyJoin(roomId):
+    print('A player joined a lobby!!!',json)
 
 @app.errorhandler(404)
 def page_not_found(error):
