@@ -11,7 +11,7 @@ app.secret_key = creds.secretKey
 SALT = creds.salt
 
 #Establishes DB connection
-con = pymysql.connect(creds.DBHost, creds.DBUser, creds.DBPass, creds.DBName,cursorclass=pymysql.cursors.DictCursor)
+con = pymysql.connect(creds.DBHost, creds.DBUser, creds.DBPass, creds.DBName,cursorclass=pymysql.cursors.DictCursor,autocommit=True)
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -32,9 +32,7 @@ def login():
 
 @app.route("/verify",methods=['POST'])
 def verify():
-#TODO: insert code to check database for valid login
-    saltedPass = request.form["password"] + SALT
-    hashedPass = hashlib.md5(saltedPass.encode())
+    hashedPass = hashlib.md5((request.form["password"] + SALT).encode())
     print("HASHED PASS:",hashedPass.hexdigest())
     cur = con.cursor()
     cur.execute("SELECT Password FROM User WHERE Username = %s",(request.form['username']))
@@ -47,6 +45,9 @@ def verify():
     else:
         session["username"] = request.form['username']
         session['loggedIn'] = 1
+        cur = con.cursor()
+        cur.execute("UPDATE User SET LoggedIn = 1 WHERE Username = %s",(request.form['username']))
+        cur.close()
         return redirect("/game")
 
 @app.route("/guestlogin")
@@ -66,6 +67,9 @@ def stats():
 
 @app.route("/signout")
 def signout():
+    cur = con.cursor()
+    cur.execute("UPDATE User SET LoggedIn = 0 WHERE Username = %s",(session['username']))
+    cur.close()
     session.clear()
     return redirect("/")
 
