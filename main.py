@@ -43,19 +43,32 @@ def verify():
     elif hashedPass.hexdigest() != result[0]["Password"]:
         return render_template("login.html",error="badPassword")
     else:
-        session["username"] = request.form['username']
-        session['loggedIn'] = 1
         cur = con.cursor()
         cur.execute("UPDATE User SET LoggedIn = 1 WHERE Username = %s",(request.form['username']))
+        cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
+        result = cur.fetchone()
         cur.close()
+        session["userId"] = result["UserId"]
+        session["username"] = request.form['username']
+        session['loggedIn'] = 1
         return redirect("/game")
 
 @app.route("/guestlogin")
 def guestlogin():
-#TODO: insert code to create guest in database and get id to append to name
-    session["username"] = "Guest#1"
+    cur = con.cursor()
+    cur.execute("SELECT MAX(UserId) AS HighestID FROM User")
+    highestId = cur.fetchone()
+    guestId = int(highestId["HighestID"]) + 1
+    cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '0', '1')",('Guest#{}'.format(guestId),random.getrandbits(128)))
+    cur.execute("SELECT UserId FROM User WHERE Username =%s",('Guest#{}'.format(guestId)))
+    UserId = cur.fetchone()
+    cur.close()
+    session["userId"] = guestId
+    session["username"] = 'Guest#{}'.format(guestId)
     session['loggedIn'] = 1
-    return redirect("/game")
+    print("SESSION VARS:",session)
+    cur.close()
+    return redirect("game")
 
 @app.route("/stats")
 def stats():
@@ -68,6 +81,9 @@ def stats():
 @app.route("/signout")
 def signout():
     cur = con.cursor()
+    if "Guest#" in session["username"]:
+        print(f"{session['username']} signed out. Deleting from DB.")
+        cur.execute("DELETE FROM User WHERE UserId = %s",(session['userId']))
     cur.execute("UPDATE User SET LoggedIn = 0 WHERE Username = %s",(session['username']))
     cur.close()
     session.clear()
@@ -87,14 +103,29 @@ def createAccount():
         if session["loggedIn"]:
             return redirect("/")
     except:
+        print(request.form)
         if request.form["password"] != request.form["confirmPassword"]:
             return render_template("signup.html",error="badPassword")
-        #also add if statement if username already exists
-
-    print(request.form)
-    session["username"] = request.form["username"]
-    session['loggedIn'] = 1
-    return redirect("game")
+        cur = con.cursor()
+        cur.execute("SELECT * FROM User WHERE Username = %s",(request.form['username']))
+        result = cur.fetchall()
+        cur.close()
+        if len(result) != 0: #the username already exists in the db
+            return render_template("login.html",error="badUsername")
+        else:
+            hashedPass = hashlib.md5((request.form["password"] + SALT).encode()).hexdigest()
+            cur = con.cursor()
+            try: #with email
+                cur.execute("INSERT INTO User (Username, Password, Email, IsGuest, LoggedIn) VALUES (%s, %s, %s, '0', '1')",(request.form['username'],hashedPass,request.form['email']))
+            except: #without email
+                cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '0', '1')",(request.form['username'],hashedPass))
+            cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
+            result = cur.fetchall()
+            cur.close()
+            session["userId"] = result[0]["UserId"]
+            session["username"] = request.form["username"]
+            session['loggedIn'] = 1
+            return redirect("game")
 
 @app.route("/game")
 def game():
