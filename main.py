@@ -211,7 +211,7 @@ def joinGame():
                     print("****************")
                     print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
                     roomId = session["roomId"]
-                    # socketio.send('player joined a lobby', roomId=roomId)
+                    socketio.send('player joined a lobby', roomId=roomId)
                     return redirect("lobby")
             print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
