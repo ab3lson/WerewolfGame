@@ -2,12 +2,15 @@
 #bootstrap theme found at https://bootswatch.com/darkly/
 
 from flask import Flask, render_template, session, request, redirect, send_from_directory
+from flask_socketio import SocketIO
+from flask_socketio import send, emit
 import pymysql
 import os, string, random, hashlib
 import creds
 
 app = Flask(__name__)
 app.secret_key = creds.secretKey
+socketio = SocketIO(app)
 SALT = creds.salt
 
 #Establishes DB connection
@@ -321,9 +324,14 @@ def sessionView():
     print("*************")
     return redirect("/")
 
+""" SOCKET ROUTES BELOW """
+@socketio.on('my event')
+def helloWorld(json):
+    print('I found a socket!',json)
+
 @app.errorhandler(404)
 def page_not_found(error):
    return render_template('404.html'), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',port=3088,debug=True)
+    socketio.run(app, host='0.0.0.0',port=3088,debug=True)

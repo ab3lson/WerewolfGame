@@ -23,6 +23,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+        integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+
     <title>Lobby</title>
 </head>
 
@@ -38,7 +41,9 @@
                     <div class="container text-center">
                         <table id="names" class="table table-hover">
                             {% for player in playerNames %}
-                            <tr><td>{{ player }}</td></tr>
+                            <tr>
+                                <td>{{ player }}</td>
+                            </tr>
                             {% endfor %}
                         </table>
                     </div>
@@ -61,7 +66,8 @@
     </div>
     <script>
         $(document).ready(function () { //also call when new player joins event with socketio
-            let progress = {{currentPlayers}}/{{playersNeeded}}
+            let progress = {{ currentPlayers }
+        } / {{ playersNeeded }}
             $("#progressbar").attr('style', "width: " + (progress * 100) + "%");
         });
 

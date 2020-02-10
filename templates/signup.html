@@ -12,69 +12,6 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
         integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
-    <title>Login</title>
-</head>
-{% set active_page = "login" %}
-{% include 'navbar.html' %}
-
-<body>
-    <div class="container">
-        <div class="d-flex justify-content-center h-100 mt-4">
-        <div class="card">
-            <article class="card-body mx-auto">
-                <h4 class="card-header">Create Account</h4>
-                {% if error %}
-                <div class="alert alert-dismissible alert-danger">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {% if error=="badPassword" %}
-                        <strong>Passwords did not match!</strong>
-                    {% elif error=="badUsername" %}
-                        <strong>That username is already taken!</strong>
-                    {% endif %}
-                  </div>
-                {% endif %}
-                <p class="text-center">Get started with your free account</p>
-                <form action="createAccount" method="POST">
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
-                        </div>
-                        <input required class="form-control" placeholder="Full name" name="fullName" type="text">
-                    </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
-                        </div>
-                        <input class="form-control" placeholder="Email address" name="email" type="email">
-                    </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-user-secret"></i> </span>
-                        </div>
-                        <input required maxlength="16" class="form-control" placeholder="Username" name="username" type="text">
-                    </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
-                        </div>
-                        <input required maxlength="32" class="form-control" placeholder="Create password" name="password" type="password">
-                    </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
-                        </div>
-                        <input required maxlength="32" class="form-control" placeholder="Repeat password" name="confirmPassword" type="password">
-                    </div> <!-- form-group// -->
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary btn-block"> Create Account </button>
-                    </div> <!-- form-group// -->
-                    <p class="text-center">Have an account? <a href="login">Log In</a> </p>
-                </form>
-            </article>
-        </div> <!-- card.// -->
-    </div>
-    </div>
-
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -86,6 +23,76 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+        integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+
+
+    <title>Login</title>
+</head>
+{% set active_page = "login" %}
+{% include 'navbar.html' %}
+
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-center h-100 mt-4">
+            <div class="card">
+                <article class="card-body mx-auto">
+                    <h4 class="card-header">Create Account</h4>
+                    {% if error %}
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {% if error=="badPassword" %}
+                        <strong>Passwords did not match!</strong>
+                        {% elif error=="badUsername" %}
+                        <strong>That username is already taken!</strong>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <p class="text-center">Get started with your free account</p>
+                    <form action="createAccount" method="POST">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                            </div>
+                            <input required class="form-control" placeholder="Full name" name="fullName" type="text">
+                        </div> <!-- form-group// -->
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                            </div>
+                            <input class="form-control" placeholder="Email address" name="email" type="email">
+                        </div> <!-- form-group// -->
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-user-secret"></i> </span>
+                            </div>
+                            <input required maxlength="16" class="form-control" placeholder="Username" name="username"
+                                type="text">
+                        </div> <!-- form-group// -->
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                            </div>
+                            <input required maxlength="32" class="form-control" placeholder="Create password"
+                                name="password" type="password">
+                        </div> <!-- form-group// -->
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                            </div>
+                            <input required maxlength="32" class="form-control" placeholder="Repeat password"
+                                name="confirmPassword" type="password">
+                        </div> <!-- form-group// -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block"> Create Account </button>
+                        </div> <!-- form-group// -->
+                        <p class="text-center">Have an account? <a href="login">Log In</a> </p>
+                    </form>
+                </article>
+            </div> <!-- card.// -->
+        </div>
+    </div>
+
 </body>
 
 </html>
