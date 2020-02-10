@@ -2,10 +2,16 @@
 #bootstrap theme found at https://bootswatch.com/darkly/
 
 from flask import Flask, render_template, session, request, redirect, send_from_directory
-import os, string, random
+import pymysql
+import os, string, random, hashlib
+import creds
 
 app = Flask(__name__)
-app.secret_key = "WEareBYUstudents!"
+app.secret_key = creds.secretKey
+SALT = creds.salt
+
+#Establishes DB connection
+con = pymysql.connect(creds.DBHost, creds.DBUser, creds.DBPass, creds.DBName,cursorclass=pymysql.cursors.DictCursor)
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -27,9 +33,21 @@ def login():
 @app.route("/verify",methods=['POST'])
 def verify():
 #TODO: insert code to check database for valid login
-    session["username"] = request.form['username']
-    session['loggedIn'] = 1
-    return redirect("/game")
+    saltedPass = request.form["password"] + SALT
+    hashedPass = hashlib.md5(saltedPass.encode())
+    print("HASHED PASS:",hashedPass.hexdigest())
+    cur = con.cursor()
+    cur.execute("SELECT Password FROM User WHERE Username = %s",(request.form['username']))
+    result = cur.fetchall()
+    cur.close()
+    if len(result) == 0:
+        return render_template("login.html",error="badUsername")
+    elif hashedPass.hexdigest() != result[0]["Password"]:
+        return render_template("login.html",error="badPassword")
+    else:
+        session["username"] = request.form['username']
+        session['loggedIn'] = 1
+        return redirect("/game")
 
 @app.route("/guestlogin")
 def guestlogin():
@@ -231,6 +249,17 @@ def vote():
     # except:
     #     return redirect("/login")
     return render_template("gameViews/vote.html")
+
+@app.route("/dbtest")
+def dbtest():
+    cur = con.cursor()
+    cur.execute("SELECT * FROM User")
+    result = cur.fetchall()
+    for x in result:
+        print(x)
+        print(x["Username"])
+    cur.close()
+    return redirect("/")
 
 
 
