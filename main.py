@@ -103,7 +103,7 @@ def createAccount():
         if session["loggedIn"]:
             return redirect("/")
     except:
-        print(request.form)
+        # print(request.form)
         if request.form["password"] != request.form["confirmPassword"]:
             return render_template("signup.html",error="badPassword")
         cur = con.cursor()
@@ -111,7 +111,7 @@ def createAccount():
         result = cur.fetchall()
         cur.close()
         if len(result) != 0: #the username already exists in the db
-            return render_template("login.html",error="badUsername")
+            return render_template("signup.html",error="badUsername")
         else:
             hashedPass = hashlib.md5((request.form["password"] + SALT).encode()).hexdigest()
             cur = con.cursor()
@@ -121,10 +121,11 @@ def createAccount():
                 cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '0', '1')",(request.form['username'],hashedPass))
             cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
             result = cur.fetchall()
-            cur.close()
+            cur.execute("INSERT INTO Stats (UserId) VALUES (%s)",(result[0]["UserId"]))
             session["userId"] = result[0]["UserId"]
             session["username"] = request.form["username"]
             session['loggedIn'] = 1
+            cur.close()
             return redirect("game")
 
 @app.route("/game")
@@ -303,13 +304,13 @@ def sessionDestroy():
 @app.route("/sessionView")
 def sessionView():
     print("*************")
-	print(session)
+    print(session)
     print("*************")
-	return redirect("/")
+    return redirect("/")
 
 @app.errorhandler(404)
 def page_not_found(error):
    return render_template('404.html'), 404
-    
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port=3088,debug=True)
