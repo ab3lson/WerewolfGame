@@ -63,7 +63,7 @@ def guestlogin():
     cur.execute("SELECT UserId FROM User WHERE Username =%s",('Guest#{}'.format(guestId)))
     UserId = cur.fetchone()
     cur.close()
-    session["userId"] = guestId
+    session["userId"] = UserId["UserId"]
     session["username"] = 'Guest#{}'.format(guestId)
     session['loggedIn'] = 1
     print("SESSION VARS:",session)
