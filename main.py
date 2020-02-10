@@ -74,7 +74,20 @@ def guestlogin():
 def stats():
     try:
         if session["loggedIn"]:
-            return render_template("stats.html")
+            cur = con.cursor()
+            cur.execute("SELECT * FROM Stats WHERE UserId = %s",(session['userId']))
+            result = cur.fetchall()
+            cur.close()
+            error = None
+            stats = None
+            if len(result) == 0:
+                error = "isGuest"
+            else:
+                stats = result[0]
+            if error == "isGuest":
+                return render_template("game.html",error=error)
+            # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
+            return render_template("stats.html",stats=stats)
     except:
         return redirect("/")
 
