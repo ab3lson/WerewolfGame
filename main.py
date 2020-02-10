@@ -295,19 +295,16 @@ def vote():
     #     return redirect("/login")
     return render_template("gameViews/vote.html")
 
-@app.route("/dbtest")
-def dbtest():
-    cur = con.cursor()
-    cur.execute("SELECT * FROM User")
-    result = cur.fetchall()
-    for x in result:
-        print(x)
-        print(x["Username"])
-    cur.close()
-    return redirect("/")
 @app.route("/sessionDestroy")
 def sessionDestroy():
 	session.clear()
+	return redirect("/")
+
+@app.route("/sessionView")
+def sessionView():
+    print("*************")
+	print(session)
+    print("*************")
 	return redirect("/")
 
 @app.errorhandler(404)
