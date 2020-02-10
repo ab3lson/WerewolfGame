@@ -211,7 +211,6 @@ def joinGame():
                     print("****************")
                     print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
                     roomId = session["roomId"]
-                    socketio.send('player joined a lobby', roomId=roomId)
                     return redirect("lobby")
             print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
@@ -326,13 +325,16 @@ def sessionView():
     return redirect("/")
 
 """ SOCKET ROUTES BELOW """
-@socketio.on('my event')
-def helloWorld(json):
-    print('I found a socket!',json)
 
 @socketio.on('player joined a lobby')
 def lobbyJoin(roomId):
-    print('A player joined a lobby!!!',json)
+    print('A player joined the lobby {}!!!'.format(roomId))
+    userList = None
+    for game in GAMES:
+        print("TESTING:",game["roomId"])
+        if roomId == game["roomId"]:
+            userList=game["players"]
+    emit('reload users in lobby', userList)
 
 @app.errorhandler(404)
 def page_not_found(error):

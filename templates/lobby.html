@@ -69,6 +69,18 @@
             let progress = {{ currentPlayers }} / {{ playersNeeded }}
             $("#progressbar").attr('style', "width: " + (progress * 100) + "%");
         });
+        var socket = io();
+        socket.on('connect', function() {
+            socket.emit('player joined a lobby','{{roomId}}');
+        });
+
+        socket.on('reload users in lobby', function(userList) {
+            $(names).empty();
+            console.log(userList)
+            // jQuery.each(userList, function(index, value) {
+                
+            //  });
+        });
 
     </script>
 
