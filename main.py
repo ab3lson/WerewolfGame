@@ -166,17 +166,17 @@ def createGame():
         if session["loggedIn"]:
             try:
                 if session["roomId"]:
-                    print("*************\nThe user {} tried to make a new room, but they are already in room {}!".format(session["username"],session["roomId"]))
-                    print("Removing old roomId to create a new room.\n***************")
+                    print("The user {} tried to make a new room, but they are already in room {}!".format(session["username"],session["roomId"]))
+                    print("Removing old roomId to create a new room.")
                     session.pop('roomId', None)
             except:
                 pass #the user is not already in a room
             decisionSeconds = int(request.form["decisionTimer"])*60
             newRoomId = roomGenerator()
             session["roomId"] = newRoomId
-            print("*****************\nROOM ID GENERATED: {}".format(session["roomId"]))
-            print("Variables from form:\nDecision in seconds:",decisionSeconds,"\nPlayers needed:", request.form["playersNeeded"])
-            print("*****************")
+            # print("*****************\nROOM ID GENERATED: {}".format(session["roomId"]))
+            # print("Variables from form:\nDecision in seconds:",decisionSeconds,"\nPlayers needed:", request.form["playersNeeded"])
+            # print("*****************")
             playersInt = int(request.form["playersNeeded"])
             cur = con.cursor()
             cur.execute("INSERT INTO Lobby (RoomId, PlayersNeeded, DecisionTimer) VALUES (%s, %s, %s)",(newRoomId,int(request.form["playersNeeded"]),int(decisionSeconds)))
@@ -195,8 +195,8 @@ def joinGame():
     try:
         try:
             if session["roomId"]:
-                print("*************\nThe user {} is tried to join room {}, but they are already in room {}!".format(session["username"],request.form["roomId"],session["roomId"]))
-                print("Removing old roomId to join a new room.\n***************")
+                print("The user {} tried to join room {}, but they are already in room {}!".format(session["username"],request.form["roomId"],session["roomId"]))
+                print("Removing old roomId to join a new room.")
                 session.pop('roomId', None)
         except:
             pass #the user is not already in a room
@@ -208,11 +208,10 @@ def joinGame():
                     cur = con.cursor()
                     cur.execute("UPDATE Lobby SET CurrentPlayers = CurrentPlayers + 1 WHERE RoomId = %s",(session["roomId"]))
                     cur.close()
-                    print("****************")
-                    print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
+                    print("The user {} is joining the lobby: {}".format(session["username"],session["roomId"]))
                     roomId = session["roomId"]
                     return redirect("lobby")
-            print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
+            print("The user {} is entered invalid roomId: {}".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
     except Exception as e:
         print("**ERROR in join game:",e)
@@ -230,8 +229,10 @@ def lobby():
                     currentPlayers=len(game["players"])
                     playersNeeded=game["playersNeeded"]
                     gameDict = game
-            if currentPlayers == playersNeeded:#TODO: add all players from players list in GAMES to ActiveGames in the DB
-                pass #TODO: emit a message to all players in the lobby and redirect them to /pregame where roles get assigned
+            if int(currentPlayers) == int(playersNeeded):#TODO: add all players from players list in GAMES to ActiveGames in the DB
+                print(f"Player count reached for {session['roomId']}!\nREDIRECTING and starting game!")
+                socketio.emit('start game', room=session["roomId"])
+                return redirect("pregame")
             else:
                 return render_template("lobby.html",roomId=session["roomId"],currentPlayers=currentPlayers,playersNeeded=playersNeeded,playerNames=gameDict["players"])
     except Exception as e:
@@ -242,7 +243,6 @@ def lobby():
 def leaveLobby():
     try:
         if session["loggedIn"] and session["roomId"]:
-            print("****************")
             for game in GAMES:
                 if game["roomId"] == session["roomId"]:
                     userList =  game["players"]
@@ -263,7 +263,6 @@ def leaveLobby():
                         GAMES.remove(game)
                         print("Remaining lobbies:",GAMES)
             session.pop('roomId', None)
-            print("***************")
             return redirect("/game")
     except Exception as e:
         print("**ERROR in leaveLobby route:",e)
@@ -336,7 +335,7 @@ def lobbyNotify(roomId):
     for game in GAMES:
         if roomId == game["roomId"]:
             userList=game["players"]
-    print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
+    # print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
     emit('reload users', userList, room=roomId)
 
 # @socketio.on('refresh lobby list')

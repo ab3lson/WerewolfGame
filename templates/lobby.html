@@ -89,7 +89,12 @@
 
                 console.log('User List was refreshed with:' + userList);
             })
-            
+
+            socket.on('start game', function (userList){
+                console.log("PLAYER COUNT REACHED!!!*******")
+                window.location.href = "/pregame";
+            })
+
         });
 
     </script>
