@@ -3,7 +3,7 @@
 
 from flask import Flask, render_template, session, request, redirect, send_from_directory
 from flask_socketio import SocketIO
-from flask_socketio import send, emit
+from flask_socketio import send, emit, join_room, leave_room
 import pymysql
 import os, string, random, hashlib
 import creds
@@ -332,12 +332,13 @@ def sessionView():
 @socketio.on('lobby entered')
 def lobbyNotify(roomId):
     print(f"\nA player joined the room {roomId}\n")
+    join_room(roomId)
     userList = None
     for game in GAMES:
         if roomId == game["roomId"]:
             userList=game["players"]
     print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
-    emit('reload users', userList,broadcast=True)
+    emit('reload users', userList, room=roomId)
 
 
 
