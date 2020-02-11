@@ -211,9 +211,6 @@ def joinGame():
                     print("****************")
                     print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
                     roomId = session["roomId"]
-
-                    socketio.emit('player joined a lobby', roomId) #TESTING!!!!
-
                     return redirect("lobby")
             print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
@@ -248,6 +245,7 @@ def leaveLobby():
             print("****************")
             for game in GAMES:
                 if game["roomId"] == session["roomId"]:
+                    userList =  game["players"]
                     for user in game["players"]:
                         if user == session["username"]:
                             game["players"].remove(user)
@@ -255,7 +253,8 @@ def leaveLobby():
                             cur = con.cursor()
                             cur.execute("UPDATE Lobby SET CurrentPlayers = CurrentPlayers - 1 WHERE RoomId = %s",(session["roomId"]))
                             cur.close()
-                    print("Players left in the lobby:",len(game["players"]))
+                            socketio.emit('reload users', userList,room=session["roomId"]) #tells view for all players in the lobby to refresh
+                    # print("Players left in the lobby:",len(game["players"]))
                     if len(game["players"]) == 0:
                         print("Nobody is in the lobby: {}. Deleting the lobby.".format(session["roomId"]))
                         cur = con.cursor()
@@ -339,6 +338,16 @@ def lobbyNotify(roomId):
             userList=game["players"]
     print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
     emit('reload users', userList, room=roomId)
+
+# @socketio.on('refresh lobby list')
+# def refreshLobby(roomId):
+#     print("The room is be refreshed is:",roomId)
+#     userList = None
+#     for game in GAMES:
+#         if roomId == game["roomId"]:
+#             userList=game["players"]
+#     print(f"A user left the lobby {roomId}.\n This is the new user list:{userList}")
+#     emit('reload users', userList, room=roomId)
 
 
 
