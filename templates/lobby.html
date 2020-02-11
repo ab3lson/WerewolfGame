@@ -31,7 +31,7 @@
 
 <body>
     <div class="d-flex justify-content-center h-100 mt-4">
-        <div class="card">
+        <div class="card" id="lobbyCard">
             <div class="card-header text-center">
                 <h3>Lobby: {{roomId}}</h3>
                 <h5>People: <span id="currentPlayers">{{currentPlayers}}</span>/{{playersNeeded}}</h5>
@@ -65,21 +65,30 @@
         </div>
     </div>
     <script>
-        $(document).ready(function () { //also call when new player joins event with socketio
-            let progress = {{ currentPlayers }} / {{ playersNeeded }}
+        function progressBar(){ //changes progress bar based on current players
+            let progress = $('#currentPlayers').text() / {{ playersNeeded }}
             $("#progressbar").attr('style', "width: " + (progress * 100) + "%");
-        });
-        var socket = io();
-        socket.on('connect', function() {
-            socket.emit('player joined a lobby','{{roomId}}');
-        });
+        }
 
-        socket.on('reload users in lobby', function(userList) {
-            $(names).empty();
-            console.log(userList)
-            // jQuery.each(userList, function(index, value) {
-                
-            //  });
+        function updateCount(currentPlayers){ //changes current player count
+            $("#currentPlayers").html(currentPlayers);
+        }
+        
+        var socket = io(); // declares the socket
+
+        $(document).ready(function () {
+            socket.emit('lobby entered','{{roomId}}');
+
+            socket.on('reload users', function (userList){
+                $('#names').empty();
+                for (let user of userList) {
+                    $('#names').append('<tr><td>'+user+'</tr></td>');
+                }
+                updateCount(userList.length);
+                progressBar();
+
+                console.log('User List was refreshed with:' + userList);
+            })
         });
 
     </script>

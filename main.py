@@ -69,7 +69,7 @@ def guestlogin():
     session["userId"] = UserId["UserId"]
     session["username"] = 'Guest#{}'.format(guestId)
     session['loggedIn'] = 1
-    print("SESSION VARS:",session)
+    # print("SESSION VARS:",session)
     cur.close()
     return redirect("game")
 
@@ -211,6 +211,9 @@ def joinGame():
                     print("****************")
                     print("The user {} is joining the lobby: {}\n***************".format(session["username"],session["roomId"]))
                     roomId = session["roomId"]
+
+                    socketio.emit('player joined a lobby', roomId) #TESTING!!!!
+
                     return redirect("lobby")
             print("The user {} is entered invalid roomId: {}\n***************".format(session["username"],request.form["roomId"]))
             return redirect("/game")          
@@ -326,15 +329,18 @@ def sessionView():
 
 """ SOCKET ROUTES BELOW """
 
-@socketio.on('player joined a lobby')
-def lobbyJoin(roomId):
-    print('A player joined the lobby {}!!!'.format(roomId))
+@socketio.on('lobby entered')
+def lobbyNotify(roomId):
+    print(f"\nA player joined the room {roomId}\n")
     userList = None
     for game in GAMES:
-        print("TESTING:",game["roomId"])
         if roomId == game["roomId"]:
             userList=game["players"]
-    emit('reload users in lobby', userList)
+    print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
+    emit('reload users', userList,broadcast=True)
+
+
+
 
 @app.errorhandler(404)
 def page_not_found(error):
