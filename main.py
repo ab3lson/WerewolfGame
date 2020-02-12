@@ -70,7 +70,6 @@ def guestlogin():
     session["username"] = 'Guest#{}'.format(guestId)
     session['loggedIn'] = 1
     # print("SESSION VARS:",session)
-    cur.close()
     return redirect("game")
 
 @app.route("/stats")
