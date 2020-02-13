@@ -7,6 +7,9 @@ from flask_socketio import send, emit, join_room, leave_room
 import pymysql
 import os, string, random, hashlib
 import creds
+import logging
+from time import strftime
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 app.secret_key = creds.secretKey
@@ -20,6 +23,13 @@ GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
 def roomGenerator(size=4, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
+"""Handles the connection log after each request comes in (see last section of code)"""
+@app.after_request
+def after_request(response):
+    timestamp = strftime('[%Y-%b-%d %H:%M]')
+    logger.error('%s %s %s %s %s %s', timestamp, request.remote_addr, request.method, request.scheme, request.full_path, response.status)
+    return response
 
 @app.route('/favicon.ico')
 def favicon():
@@ -46,6 +56,7 @@ def verify():
     elif hashedPass.hexdigest() != result[0]["Password"]:
         return render_template("login.html",error="badPassword")
     else:
+        
         cur = con.cursor()
         cur.execute("UPDATE User SET LoggedIn = 1 WHERE Username = %s",(request.form['username']))
         cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
@@ -355,4 +366,8 @@ def page_not_found(error):
    return render_template('404.html'), 404
 
 if __name__ == "__main__":
+    handler = RotatingFileHandler('../backups/werewolfConnection.log', maxBytes=100000, backupCount=3)
+    logger = logging.getLogger('tdm')
+    logger.setLevel(logging.ERROR)
+    logger.addHandler(handler)
     socketio.run(app, host='0.0.0.0',port=3088,log_output=True,debug=True)
