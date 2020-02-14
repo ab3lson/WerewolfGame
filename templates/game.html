@@ -64,8 +64,10 @@
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center">
+                        {% if "Guest#" not in session['username'] %}
                         <a class="btn btn-warning col-auto mr-auto" href="/stats" role="button"><i
                                 class="fas fa-chart-line"></i> Stats</a>
+                        {% endif %}
                         <a class="btn btn-warning col-auto" href="#" role="button"><i
                                 class="fas fa-cog"></i>Settings</a>
                     </div>
