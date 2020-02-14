@@ -339,6 +339,15 @@ def vote():
     #     return redirect("/login")
     return render_template("gameViews/vote.html")
 
+@app.route("/results")
+def results():
+    # try:
+    #     if session["loggedIn"]:
+    #         return render_template("create.html")
+    # except:
+    #     return redirect("/login")
+    return render_template("gameViews/results.html")
+
 @app.route("/sessionDestroy")
 def sessionDestroy():
 	session.clear()
