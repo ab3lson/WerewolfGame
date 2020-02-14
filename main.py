@@ -10,14 +10,30 @@ import creds
 import logging
 from time import strftime
 from logging.handlers import RotatingFileHandler
+from DBUtils.PersistentDB import PersistentDB
 
 app = Flask(__name__)
 app.secret_key = creds.secretKey
 socketio = SocketIO(app)
 SALT = creds.salt
 
-#Establishes DB connection
-con = pymysql.connect(creds.DBHost, creds.DBUser, creds.DBPass, creds.DBName,cursorclass=pymysql.cursors.DictCursor,autocommit=True)
+
+#con = pymysql.connect(creds.DBHost, creds.DBUser, creds.DBPass, creds.DBName,cursorclass=pymysql.cursors.DictCursor,autocommit=True)
+
+def connect_db():
+    '''Establishes DB connection'''
+    return PersistentDB(
+        creator = pymysql, # the rest keyword arguments belong to pymysql
+        user = creds.DBUser, password = creds.DBPass, database = creds.DBName, 
+        autocommit = True, charset = 'utf8mb4', 
+        cursorclass = pymysql.cursors.DictCursor)
+
+def get_db():
+    '''Opens a new database connection per app.'''
+    if not hasattr(app, 'db'):
+        app.db = connect_db()
+    return app.db.connection() 
+
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -47,7 +63,7 @@ def login():
 def verify():
     hashedPass = hashlib.md5((request.form["password"] + SALT).encode())
     print("HASHED PASS:",hashedPass.hexdigest())
-    cur = con.cursor()
+    cur = get_db().cursor()
     cur.execute("SELECT Password FROM User WHERE Username = %s",(request.form['username']))
     result = cur.fetchall()
     cur.close()
@@ -57,7 +73,7 @@ def verify():
         return render_template("login.html",error="badPassword")
     else:
         
-        cur = con.cursor()
+        cur = get_db().cursor()
         cur.execute("UPDATE User SET LoggedIn = 1 WHERE Username = %s",(request.form['username']))
         cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
         result = cur.fetchone()
@@ -69,7 +85,7 @@ def verify():
 
 @app.route("/guestlogin")
 def guestlogin():
-    cur = con.cursor()
+    cur = get_db().cursor()
     cur.execute("SELECT MAX(UserId) AS HighestID FROM User")
     highestId = cur.fetchone()
     guestId = int(highestId["HighestID"]) + 1
@@ -87,7 +103,7 @@ def guestlogin():
 def stats():
     try:
         if session["loggedIn"]:
-            cur = con.cursor()
+            cur = get_db().cursor()
             cur.execute("SELECT * FROM Stats WHERE UserId = %s",(session['userId']))
             result = cur.fetchall()
             cur.close()
@@ -106,7 +122,7 @@ def stats():
 
 @app.route("/signout")
 def signout():
-    cur = con.cursor()
+    cur = get_db().cursor()
     if "Guest#" in session["username"]:
         print(f"{session['username']} signed out. Deleting from DB.")
         cur.execute("DELETE FROM User WHERE UserId = %s",(session['userId']))
@@ -132,7 +148,7 @@ def createAccount():
         # print(request.form)
         if request.form["password"] != request.form["confirmPassword"]:
             return render_template("signup.html",error="badPassword")
-        cur = con.cursor()
+        cur = get_db().cursor()
         cur.execute("SELECT * FROM User WHERE Username = %s",(request.form['username']))
         result = cur.fetchall()
         cur.close()
@@ -140,7 +156,7 @@ def createAccount():
             return render_template("signup.html",error="badUsername")
         else:
             hashedPass = hashlib.md5((request.form["password"] + SALT).encode()).hexdigest()
-            cur = con.cursor()
+            cur = get_db().cursor()
             try: #with email
                 cur.execute("INSERT INTO User (Username, Password, Email, IsGuest, LoggedIn) VALUES (%s, %s, %s, '0', '1')",(request.form['username'],hashedPass,request.form['email']))
             except: #without email
@@ -188,7 +204,7 @@ def createGame():
             # print("Variables from form:\nDecision in seconds:",decisionSeconds,"\nPlayers needed:", request.form["playersNeeded"])
             # print("*****************")
             playersInt = int(request.form["playersNeeded"])
-            cur = con.cursor()
+            cur = get_db().cursor()
             cur.execute("INSERT INTO Lobby (RoomId, PlayersNeeded, DecisionTimer) VALUES (%s, %s, %s)",(newRoomId,int(request.form["playersNeeded"]),int(decisionSeconds)))
             cur.close()
             newGame = {"roomId":session["roomId"],"players":[session["username"]],"playersNeeded":request.form["playersNeeded"],"decisionTimer":decisionSeconds}
@@ -215,7 +231,7 @@ def joinGame():
                 if request.form["roomId"] == game["roomId"]:
                     session["roomId"] = request.form["roomId"]
                     game["players"].append(session["username"])
-                    cur = con.cursor()
+                    cur = get_db().cursor()
                     cur.execute("UPDATE Lobby SET CurrentPlayers = CurrentPlayers + 1 WHERE RoomId = %s",(session["roomId"]))
                     cur.close()
                     print("The user {} is joining the lobby: {}".format(session["username"],session["roomId"]))
@@ -260,14 +276,14 @@ def leaveLobby():
                         if user == session["username"]:
                             game["players"].remove(user)
                             print("The user {} left the lobby: {}".format(session["username"],session["roomId"]))
-                            cur = con.cursor()
+                            cur = get_db().cursor()
                             cur.execute("UPDATE Lobby SET CurrentPlayers = CurrentPlayers - 1 WHERE RoomId = %s",(session["roomId"]))
                             cur.close()
                             socketio.emit('reload users', userList,room=session["roomId"]) #tells view for all players in the lobby to refresh
                     # print("Players left in the lobby:",len(game["players"]))
                     if len(game["players"]) == 0:
                         print("Nobody is in the lobby: {}. Deleting the lobby.".format(session["roomId"]))
-                        cur = con.cursor()
+                        cur = get_db().cursor()
                         cur.execute("DELETE FROM Lobby WHERE RoomId = %s",(session["roomId"]))
                         cur.close()
                         GAMES.remove(game)
