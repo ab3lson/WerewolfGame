@@ -269,7 +269,7 @@ def lobby():
                     if game["roomId"] == session["roomId"]:
                         game["gameLogic"] = []
                         for player in game["players"]:
-                            game["gameLogic"].append({"username":player, "role":"none", "isAlive":"1"})
+                            game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0"})
                         assign_roles(game["gameLogic"]) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 socketio.emit('start game', room=session["roomId"])
