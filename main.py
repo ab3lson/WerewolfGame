@@ -39,6 +39,10 @@ def assign_roles(gameLogic):
     print("Players and roles:",gameLogic)
     return 1
 
+def create_active_game(game):
+    print(game)
+    return 1
+
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
 def roomGenerator(size=4, chars=string.ascii_uppercase + string.digits):
@@ -267,6 +271,7 @@ def lobby():
                         for player in game["players"]:
                             game["gameLogic"].append({"username":player, "role":"none", "isAlive":"1"})
                         assign_roles(game["gameLogic"]) #assigns roles to players
+                        create_active_game(game) #adds players to ActiveGames table in DB
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
             else:
