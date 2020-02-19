@@ -34,10 +34,35 @@ def get_db():
         app.db = connect_db()
     return app.db.connection() 
 
-def assign_roles(gameLogic):
+def apply_role(role,playerList):
+    while True: #will loop until a role is assigned
+        randomPlayer = random.randrange(0,len(playerList))
+        if playerList[randomPlayer]["role"] == "villager":
+            playerList[randomPlayer]["role"] = role
+            print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
+            break
+
+def assign_roles(game):
     #logic to assign roles based on rules
-    print("Players and roles:",gameLogic)
-    return 1
+    # print("Players and roles before assignments:",game["gameLogic"])
+    print("PLAYERS NEEDED:",int(game["playersNeeded"]))
+    if 6<= int(game["playersNeeded"]) <=9:
+        apply_role("headWerewolf",game["gameLogic"])
+        apply_role("seer",game["gameLogic"])
+        apply_role("healer",game["gameLogic"])
+    if 10<= int(game["playersNeeded"]) <=13:
+        apply_role("headWerewolf",game["gameLogic"])
+        apply_role("werewolf",game["gameLogic"])
+        apply_role("seer",game["gameLogic"])
+        apply_role("healer",game["gameLogic"])
+    if 14<= int(game["playersNeeded"]) <=16:
+        apply_role("headWerewolf",game["gameLogic"])
+        apply_role("werewolf",game["gameLogic"])
+        apply_role("werewolf",game["gameLogic"])
+        apply_role("seer",game["gameLogic"])
+        apply_role("healer",game["gameLogic"])
+    # print("Players and roles AFTER assignments:",game["gameLogic"])
+    return
 
 def create_active_game(game):
     print(game)
@@ -270,7 +295,7 @@ def lobby():
                         game["gameLogic"] = []
                         for player in game["players"]:
                             game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0"})
-                        assign_roles(game["gameLogic"]) #assigns roles to players
+                        assign_roles(game) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
