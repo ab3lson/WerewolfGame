@@ -41,7 +41,7 @@
                         <h3 class="mx-auto">Your Role is:</h3>
                     </div>
                     <div class="row">
-                        <h3 class="mx-auto" id="role">{Insert Role Here}</h3>
+                        <h3 class="mx-auto" id="role">{{ session["role"] }}</h3>
                     </div>
                     <div class="container">
                         <p class="mx-auto" id="description">{Insert Role Description Here}</h3>
@@ -53,12 +53,12 @@
                             <div class="flip-card-inner">
                                 <div class="flip-card-front">
                                     <div class="row">
-                                        <p class="mx-auto">Your Role is:</p>
+                                        <p class="mx-auto">Hover for role</p>
                                     </div>
 
                                 </div>
                                 <div class="flip-card-back">
-                                    <p>{Insert Role}</p>
+                                    <p>{{session["role"]}}</p>
                                 </div>
                             </div>
                         </div>

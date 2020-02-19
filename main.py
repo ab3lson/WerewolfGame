@@ -61,11 +61,11 @@ def assign_roles(game):
         apply_role("werewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
         apply_role("healer",game["gameLogic"])
-    # print("Players and roles AFTER assignments:",game["gameLogic"])
+    print("Players and roles AFTER assignments:",game["gameLogic"])
     return
 
 def create_active_game(game):
-    print(game)
+    # print(game)
     return 1
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
@@ -341,6 +341,12 @@ def pregame():
     #         return render_template("create.html")
     # except:
     #     return redirect("/login")
+    for game in GAMES:
+        if game["roomId"] == session["roomId"]:
+            for player in game["gameLogic"]:
+                if player["username"] == session["username"]:
+                    session["role"] = player["role"]
+    #get role description text based on session variable and pass to pregame
     return render_template("gameViews/pregame.html")
 
 @app.route("/intro")
