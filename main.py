@@ -34,6 +34,10 @@ def get_db():
         app.db = connect_db()
     return app.db.connection() 
 
+def assign_roles(gameLogic):
+    #logic to assign roles based on rules
+    print("Players and roles:",gameLogic)
+    return 1
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -262,7 +266,7 @@ def lobby():
                         game["gameLogic"] = []
                         for player in game["players"]:
                             game["gameLogic"].append({"username":player, "role":"none", "isAlive":"1"})
-                        print("Game Logic:",game["gameLogic"])
+                        assign_roles(game["gameLogic"]) #assigns roles to players
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
             else:
