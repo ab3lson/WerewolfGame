@@ -257,6 +257,12 @@ def lobby():
                     gameDict = game
             if int(currentPlayers) == int(playersNeeded):#TODO: add all players from players list in GAMES to ActiveGames in the DB
                 print(f"Player count reached for {session['roomId']}!\nREDIRECTING and starting game!")
+                for game in GAMES:
+                    if game["roomId"] == session["roomId"]:
+                        game["gameLogic"] = []
+                        for player in game["players"]:
+                            game["gameLogic"].append({"username":player, "role":"none", "isAlive":"1"})
+                        print("Game Logic:",game["gameLogic"])
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
             else:
@@ -395,4 +401,4 @@ if __name__ == "__main__":
     logger = logging.getLogger('tdm')
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
-    socketio.run(app, host='0.0.0.0',port=3088,log_output=True,debug=True)
+    socketio.run(app, host='0.0.0.0',port=3088, log_output=True, debug=True)
