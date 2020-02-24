@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 13, 2020 at 08:13 PM
--- Server version: 10.0.28-MariaDB-2+b1
--- PHP Version: 7.3.11-1~deb10u1
+-- Generation Time: Feb 24, 2020 at 03:01 PM
+-- Server version: 5.7.28-0ubuntu0.18.04.4
+-- PHP Version: 7.2.24-0ubuntu0.18.04.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -19,67 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `werewolf`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ActiveGames`
---
-
-CREATE TABLE `ActiveGames` (
-  `UserId` int(11) NOT NULL,
-  `Round` int(11) NOT NULL,
-  `IsAlive` tinyint(4) NOT NULL,
-  `RoomId` int(11) NOT NULL,
-  `RoleId` int(11) NOT NULL,
-  `KillVotes` int(11) NOT NULL,
-  `IsGameLive` tinyint(4) NOT NULL,
-  `DecisionTimer` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Lobby`
---
-
-CREATE TABLE `Lobby` (
-  `PlayersNeeded` int(11) NOT NULL,
-  `ID` int(11) NOT NULL,
-  `RoomId` text NOT NULL,
-  `DecisionTimer` int(11) NOT NULL,
-  `CurrentPlayers` int(11) NOT NULL DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Roles`
---
-
-CREATE TABLE `Roles` (
-  `RoleId` int(11) NOT NULL,
-  `RoleName` varchar(50) NOT NULL,
-  `RoleDescription` varchar(1000) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Stats`
---
-
-CREATE TABLE `Stats` (
-  `UserId` int(11) NOT NULL,
-  `GamesPlayed` int(11) NOT NULL DEFAULT '0',
-  `GamesWon` int(11) NOT NULL DEFAULT '0',
-  `PeopleEaten` int(11) NOT NULL DEFAULT '0',
-  `PeopleSaved` int(11) NOT NULL DEFAULT '0',
-  `TimesWerewolf` int(11) NOT NULL DEFAULT '0',
-  `TimesHunter` int(11) NOT NULL DEFAULT '0',
-  `TimesDoctor` int(11) NOT NULL DEFAULT '0',
-  `TimesSeer` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -101,30 +40,6 @@ CREATE TABLE `User` (
 --
 
 --
--- Indexes for table `ActiveGames`
---
-ALTER TABLE `ActiveGames`
-  ADD PRIMARY KEY (`UserId`);
-
---
--- Indexes for table `Lobby`
---
-ALTER TABLE `Lobby`
-  ADD PRIMARY KEY (`ID`);
-
---
--- Indexes for table `Roles`
---
-ALTER TABLE `Roles`
-  ADD PRIMARY KEY (`RoleId`);
-
---
--- Indexes for table `Stats`
---
-ALTER TABLE `Stats`
-  ADD PRIMARY KEY (`UserId`);
-
---
 -- Indexes for table `User`
 --
 ALTER TABLE `User`
@@ -136,20 +51,10 @@ ALTER TABLE `User`
 --
 
 --
--- AUTO_INCREMENT for table `Lobby`
---
-ALTER TABLE `Lobby`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT for table `Roles`
---
-ALTER TABLE `Roles`
-  MODIFY `RoleId` int(11) NOT NULL AUTO_INCREMENT;
---
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
-  MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

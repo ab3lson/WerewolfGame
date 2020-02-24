@@ -45,7 +45,7 @@ def apply_role(role,playerList):
 def assign_roles(game):
     #logic to assign roles based on rules
     # print("Players and roles before assignments:",game["gameLogic"])
-    print("PLAYERS NEEDED:",int(game["playersNeeded"]))
+    # print("PLAYERS NEEDED:",int(game["playersNeeded"]))
     if 6<= int(game["playersNeeded"]) <=9:
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
@@ -61,12 +61,21 @@ def assign_roles(game):
         apply_role("werewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
         apply_role("healer",game["gameLogic"])
-    print("Players and roles AFTER assignments:",game["gameLogic"])
+    #print("Players and roles AFTER assignments:",game["gameLogic"])
     return
 
 def create_active_game(game):
-    # print(game)
-    return 1
+    cur = get_db().cursor()
+    #game: {"roomId":session["roomId"],"players":[session["username"]],"playersNeeded":request.form["playersNeeded"],"decisionTimer":decisionSeconds}
+    #Gamelogic: {"username":player, "role":"villager", "isAlive":"1", "isReady":"0"}
+    roomId = game["roomId"]
+    decisionTimer = game["decisionTimer"]
+    print("ADDING TO ActiveGames in DB!")
+    for player in game["gameLogic"]:
+        print("Creating entry for: {}".format(player["username"]))
+        cur.execute("INSERT INTO ActiveGames (Username, RoomId, Role, DecisionTimer) VALUES (%s, %s, %s, %s)",(player["username"], roomId, player["role"], decisionTimer))
+    cur.close()
+    return
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -289,7 +298,7 @@ def lobby():
                     playersNeeded=game["playersNeeded"]
                     gameDict = game
             if int(currentPlayers) == int(playersNeeded):#TODO: add all players from players list in GAMES to ActiveGames in the DB
-                print(f"Player count reached for {session['roomId']}!\nREDIRECTING and starting game!")
+                print(f"Player count reached for {session['roomId']}... REDIRECTING!")
                 for game in GAMES:
                     if game["roomId"] == session["roomId"]:
                         game["gameLogic"] = []
