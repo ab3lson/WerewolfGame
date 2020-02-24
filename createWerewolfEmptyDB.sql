@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 24, 2020 at 03:06 PM
+-- Generation Time: Feb 24, 2020 at 03:11 PM
 -- Server version: 5.7.28-0ubuntu0.18.04.4
 -- PHP Version: 7.2.24-0ubuntu0.18.04.1
 
@@ -60,7 +60,7 @@ CREATE TABLE `Lobby` (
 
 CREATE TABLE `Roles` (
   `RoleId` int(11) NOT NULL,
-  `RoleName` varchar(50) NOT NULL,
+  `Role` varchar(12) NOT NULL,
   `RoleDescription` varchar(1000) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -124,7 +124,7 @@ ALTER TABLE `Lobby`
 -- Indexes for table `Roles`
 --
 ALTER TABLE `Roles`
-  ADD PRIMARY KEY (`RoleId`);
+  ADD PRIMARY KEY (`Role`);
 
 --
 -- Indexes for table `Stats`
@@ -153,11 +153,6 @@ ALTER TABLE `ActiveGames`
 --
 ALTER TABLE `Lobby`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
---
--- AUTO_INCREMENT for table `Roles`
---
-ALTER TABLE `Roles`
-  MODIFY `RoleId` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `User`
 --
