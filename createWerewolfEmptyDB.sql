@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 26, 2020 at 02:44 PM
+-- Generation Time: Feb 26, 2020 at 02:58 PM
 -- Server version: 5.7.29-0ubuntu0.18.04.1
 -- PHP Version: 7.2.24-0ubuntu0.18.04.2
 
@@ -34,7 +34,8 @@ CREATE TABLE `ActiveGames` (
 	  `Role` varchar(12) NOT NULL,
 	  `KillVotes` int(11) NOT NULL DEFAULT '0',
 	  `IsGameLive` tinyint(4) NOT NULL DEFAULT '1',
-	  `DecisionTimer` int(11) NOT NULL
+	  `DecisionTimer` int(11) NOT NULL,
+	  `ActiveGameID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -46,7 +47,7 @@ CREATE TABLE `ActiveGames` (
 CREATE TABLE `Lobby` (
 	  `PlayersNeeded` int(11) NOT NULL,
 	  `ID` int(11) NOT NULL,
-	  `RoomId` text NOT NULL,
+	  `RoomId` varchar(4) NOT NULL,
 	  `DecisionTimer` int(11) NOT NULL,
 	  `CurrentPlayers` int(11) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -95,6 +96,9 @@ CREATE TABLE `Stats` (
 -- Dumping data for table `Stats`
 --
 
+INSERT INTO `Stats` (`UserId`, `GamesPlayed`, `GamesWon`, `PeopleEaten`, `PeopleSaved`, `TimesWerewolf`, `TimesHunter`, `TimesDoctor`, `TimesSeer`) VALUES
+(1, 0, 0, 0, 0, 0, 0, 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -114,6 +118,9 @@ CREATE TABLE `User` (
 -- Dumping data for table `User`
 --
 
+INSERT INTO `User` (`UserId`, `Username`, `Password`, `Email`, `IsGuest`, `LoggedIn`) VALUES
+(1, 'tyler', '83b7bcdc6ee677ef8d81c6059028a3d1', 'tyler@tyler', 0, 1);
+
 --
 -- Indexes for dumped tables
 --
@@ -122,7 +129,7 @@ CREATE TABLE `User` (
 -- Indexes for table `ActiveGames`
 --
 ALTER TABLE `ActiveGames`
-  ADD PRIMARY KEY (`Username`);
+  ADD PRIMARY KEY (`ActiveGameID`);
 
 --
 -- Indexes for table `Lobby`
@@ -153,6 +160,11 @@ ALTER TABLE `User`
 -- AUTO_INCREMENT for dumped tables
 --
 
+--
+-- AUTO_INCREMENT for table `ActiveGames`
+--
+ALTER TABLE `ActiveGames`
+  MODIFY `ActiveGameID` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `Lobby`
 --
