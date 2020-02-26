@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 24, 2020 at 03:11 PM
--- Server version: 5.7.28-0ubuntu0.18.04.4
--- PHP Version: 7.2.24-0ubuntu0.18.04.1
+-- Generation Time: Feb 26, 2020 at 02:44 PM
+-- Server version: 5.7.29-0ubuntu0.18.04.1
+-- PHP Version: 7.2.24-0ubuntu0.18.04.2
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -27,15 +27,14 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `ActiveGames` (
-  `Username` varchar(11) NOT NULL,
-  `Round` int(11) NOT NULL DEFAULT '0',
-  `IsAlive` tinyint(4) NOT NULL DEFAULT '1',
-  `RoomId` varchar(4) NOT NULL,
-  `Role` varchar(12) NOT NULL,
-  `KillVotes` int(11) NOT NULL DEFAULT '0',
-  `IsGameLive` tinyint(4) NOT NULL DEFAULT '1',
-  `DecisionTimer` int(11) NOT NULL,
-  `ActiveGameID` int(11) NOT NULL
+	  `Username` varchar(50) NOT NULL,
+	  `Round` int(11) NOT NULL DEFAULT '0',
+	  `IsAlive` tinyint(4) NOT NULL DEFAULT '1',
+	  `RoomId` varchar(4) NOT NULL,
+	  `Role` varchar(12) NOT NULL,
+	  `KillVotes` int(11) NOT NULL DEFAULT '0',
+	  `IsGameLive` tinyint(4) NOT NULL DEFAULT '1',
+	  `DecisionTimer` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -45,11 +44,11 @@ CREATE TABLE `ActiveGames` (
 --
 
 CREATE TABLE `Lobby` (
-  `RoomId` varchar(4) NOT NULL,
-  `PlayersNeeded` int(11) NOT NULL,
-  `ID` int(11) NOT NULL,
-  `DecisionTimer` int(11) NOT NULL,
-  `CurrentPlayers` int(11) NOT NULL DEFAULT '1'
+	  `PlayersNeeded` int(11) NOT NULL,
+	  `ID` int(11) NOT NULL,
+	  `RoomId` text NOT NULL,
+	  `DecisionTimer` int(11) NOT NULL,
+	  `CurrentPlayers` int(11) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -59,10 +58,20 @@ CREATE TABLE `Lobby` (
 --
 
 CREATE TABLE `Roles` (
-  `RoleId` int(11) NOT NULL,
-  `Role` varchar(12) NOT NULL,
-  `RoleDescription` varchar(1000) NOT NULL
+	  `RoleId` int(11) NOT NULL,
+	  `RoleName` varchar(50) NOT NULL,
+	  `RoleDescription` varchar(1000) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `Roles`
+--
+
+INSERT INTO `Roles` (`RoleId`, `RoleName`, `RoleDescription`) VALUES
+(1, 'villager', 'Your role is to determine who the werewolf is and chase them out.'),
+(2, 'seer', 'During the night phase you will choose one person.\r\nIt will be revealed to you whether they are a werewolf or not.\r\n'),
+(3, 'healer', 'During the night phase you will choose one person.\r\nThat person will be protected from being killed by the werewolf.\r\n'),
+(4, 'werewolf', 'During the night phase you will select one person.\r\nThat person will be killed.\r\nIf there are multiple Werewolves, you will decide together who to kill.\r\n');
 
 -- --------------------------------------------------------
 
@@ -71,23 +80,20 @@ CREATE TABLE `Roles` (
 --
 
 CREATE TABLE `Stats` (
-  `UserId` int(11) NOT NULL,
-  `GamesPlayed` int(11) NOT NULL DEFAULT '0',
-  `GamesWon` int(11) NOT NULL DEFAULT '0',
-  `PeopleEaten` int(11) NOT NULL DEFAULT '0',
-  `PeopleSaved` int(11) NOT NULL DEFAULT '0',
-  `TimesWerewolf` int(11) NOT NULL DEFAULT '0',
-  `TimesHunter` int(11) NOT NULL DEFAULT '0',
-  `TimesDoctor` int(11) NOT NULL DEFAULT '0',
-  `TimesSeer` int(11) NOT NULL DEFAULT '0'
+	  `UserId` int(11) NOT NULL,
+	  `GamesPlayed` int(11) NOT NULL DEFAULT '0',
+	  `GamesWon` int(11) NOT NULL DEFAULT '0',
+	  `PeopleEaten` int(11) NOT NULL DEFAULT '0',
+	  `PeopleSaved` int(11) NOT NULL DEFAULT '0',
+	  `TimesWerewolf` int(11) NOT NULL DEFAULT '0',
+	  `TimesHunter` int(11) NOT NULL DEFAULT '0',
+	  `TimesDoctor` int(11) NOT NULL DEFAULT '0',
+	  `TimesSeer` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `Stats`
 --
-
-INSERT INTO `Stats` (`UserId`, `GamesPlayed`, `GamesWon`, `PeopleEaten`, `PeopleSaved`, `TimesWerewolf`, `TimesHunter`, `TimesDoctor`, `TimesSeer`) VALUES
-(1, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -96,13 +102,17 @@ INSERT INTO `Stats` (`UserId`, `GamesPlayed`, `GamesWon`, `PeopleEaten`, `People
 --
 
 CREATE TABLE `User` (
-  `UserId` int(11) NOT NULL,
-  `Username` varchar(50) DEFAULT 'Guest',
-  `Password` varchar(50) DEFAULT NULL,
-  `Email` varchar(50) DEFAULT NULL,
-  `IsGuest` tinyint(4) NOT NULL,
-  `LoggedIn` tinyint(4) NOT NULL
+	  `UserId` int(11) NOT NULL,
+	  `Username` varchar(50) DEFAULT 'Guest',
+	  `Password` varchar(50) DEFAULT NULL,
+	  `Email` varchar(50) DEFAULT NULL,
+	  `IsGuest` tinyint(4) NOT NULL,
+	  `LoggedIn` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Table used to define ';
+
+--
+-- Dumping data for table `User`
+--
 
 --
 -- Indexes for dumped tables
@@ -112,7 +122,7 @@ CREATE TABLE `User` (
 -- Indexes for table `ActiveGames`
 --
 ALTER TABLE `ActiveGames`
-  ADD PRIMARY KEY (`ActiveGameID`);
+  ADD PRIMARY KEY (`Username`);
 
 --
 -- Indexes for table `Lobby`
@@ -124,7 +134,7 @@ ALTER TABLE `Lobby`
 -- Indexes for table `Roles`
 --
 ALTER TABLE `Roles`
-  ADD PRIMARY KEY (`Role`);
+  ADD PRIMARY KEY (`RoleId`);
 
 --
 -- Indexes for table `Stats`
@@ -144,20 +154,21 @@ ALTER TABLE `User`
 --
 
 --
--- AUTO_INCREMENT for table `ActiveGames`
---
-ALTER TABLE `ActiveGames`
-  MODIFY `ActiveGameID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
---
 -- AUTO_INCREMENT for table `Lobby`
 --
 ALTER TABLE `Lobby`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `Roles`
+--
+ALTER TABLE `Roles`
+  MODIFY `RoleId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
-  MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `UserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
