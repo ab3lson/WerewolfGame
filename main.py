@@ -432,6 +432,7 @@ def lobbyNotify(roomId):
 def readyUp():
     print(f"{session['username']} is ready to move on!")
     allReady = True
+    join_room(session["roomId"])
     for game in GAMES:
         if session["roomId"] == game["roomId"]:
             for player in game["gameLogic"]:
@@ -440,20 +441,17 @@ def readyUp():
             for player in game["gameLogic"]:
                 if player["isReady"] != "1":
                     allReady = False
-    # for game in GAMES:
-    #     if session["roomId"] == game["roomId"]:
-    #         print("PLAYER LIST:", game["gameLogic"])
     if allReady == True:
+        #changes all players to not ready again
+        for game in GAMES:
+            if session["roomId"] == game["roomId"]:
+                for player in game["gameLogic"]:
+                        player["isReady"] = "0"  
         print("All players are ready! Changing screens...")
-        # emit("next screen")
+        print("Sending 'next screen' to {}".format(session["roomId"]))
+        emit("next screen", room=session["roomId"])
     else:
         print("Not all players are ready yet... waiting in lobby")
-
-        
-
-
-
-
 
 
 @app.errorhandler(404)

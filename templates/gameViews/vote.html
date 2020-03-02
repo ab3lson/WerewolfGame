@@ -61,7 +61,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a class="btn btn-warning col-5" href="daytime" role="button" id="readyUp">OK</a>
+                        <button class="btn btn-warning col-5" id="readyUp">OK</button>
                     </div>
                 </div>
             </div>
@@ -69,7 +69,21 @@
 
     </div>
 
+    <script>
+        var socket = io(); // declares the socket
+        $(document).ready(function () {
+            $( "#readyUp" ).click(function() {
+                $("#readyUp").prop("disabled",true);
+                $("#readyUp").html('Wait...');
+                socket.emit('im ready');
+            });
 
+            socket.on('next screen', function (){
+                    console.log("All players ready!")
+                    window.location.href = "/nighttime";
+                })
+        });
+    </script>
 
 
 </body>
