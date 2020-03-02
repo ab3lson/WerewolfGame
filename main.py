@@ -428,15 +428,30 @@ def lobbyNotify(roomId):
     # print(f"Sending: reload users in lobby to the lobby...\n This is the user list:{userList}")
     emit('reload users', userList, room=roomId)
 
-# @socketio.on('refresh lobby list')
-# def refreshLobby(roomId):
-#     print("The room is be refreshed is:",roomId)
-#     userList = None
-#     for game in GAMES:
-#         if roomId == game["roomId"]:
-#             userList=game["players"]
-#     print(f"A user left the lobby {roomId}.\n This is the new user list:{userList}")
-#     emit('reload users', userList, room=roomId)
+@socketio.on('im ready')
+def readyUp():
+    print(f"{session['username']} is ready to move on!")
+    allReady = True
+    for game in GAMES:
+        if session["roomId"] == game["roomId"]:
+            for player in game["gameLogic"]:
+                if player["username"] == session["username"]:
+                    player["isReady"] = "1"  
+            for player in game["gameLogic"]:
+                if player["isReady"] != "1":
+                    allReady = False
+    # for game in GAMES:
+    #     if session["roomId"] == game["roomId"]:
+    #         print("PLAYER LIST:", game["gameLogic"])
+    if allReady == True:
+        print("All players are ready! Changing screens...")
+        # emit("next screen")
+    else:
+        print("Not all players are ready yet... waiting in lobby")
+
+        
+
+
 
 
 

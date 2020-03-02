@@ -62,14 +62,23 @@
                                 </div>
                             </div>
                         </div>
-                        <a class="btn btn-warning col-5" href="daytime" role="button">OK</a>
+                        <!-- <a class="btn btn-warning col-5" href="daytime" role="button" id="readyUp">OK</a> -->
+                        <button class="btn btn-warning col-5" id="readyUp">OK</button>
+
                     </div>
                 </div>
             </div>
         </div>
 
     </div>
+    <script>
+        var socket = io(); // declares the socket
 
+        $( "#readyUp" ).click(function() {
+            socket.emit('im ready');
+            console.log("TESTING!!!");
+        });
+    </script>
 </body>
 
 </html>
