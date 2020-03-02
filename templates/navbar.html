@@ -27,8 +27,12 @@
         </li>
         {% endif %}
       </ul>
-      <ul class="navbar-nav pull-right">
-        
-      </ul>
+      {% if active_page == 'game' %}
+      <div>
+	<form action="/search" method="POST">
+		<input type="text" placeholder="Username" name="search_results">            	 <button type="submit"><i class="fa fa-search"></i></button></input>
+      	</form>
+      </div>
+      {% endif %}
     </div>
   </nav>
