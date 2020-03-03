@@ -1,38 +1,41 @@
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+  integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="/">Werewolf <i class="fab fa-wolf-pack-battalion"></i></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  
-    <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav nav-fill w-100">
-        <li class="nav-item {{ 'active' if active_page == 'home' else '' }}">
-          <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-        </li>
-        <li class="nav-item {{ 'active' if active_page == 'whatIs' else '' }}">
-          <a class="nav-link" href="#"><i class="fas fa-question-circle"></i> What is Werewolf?</a>
-        </li>
-        <li class="nav-item {{ 'active' if active_page == 'game' else '' }}">
-          <a class="nav-link" href="game"><i class="fas fa-gamepad"></i> Play a Game</a>
-        </li>
-        {% if session['username'] %}
-        <li class="nav-item pull-right">
-          <a class="nav-link" href="login"><i class="fas fa-user"></i> {{session['username']}}</a>
-        </li>
-        {%else%}
-        <li class="nav-item pull-right {{ 'active' if active_page == 'login' else '' }}">
-          <a class="nav-link" href="login"><i class="fas fa-sign-in-alt"></i> Login</a>
-        </li>
-        {% endif %}
-      </ul>
-      {% if active_page == 'game' %}
-      <div>
-	<form action="/search" method="POST">
-		<input type="text" placeholder="Username" name="search_results">            	 <button type="submit"><i class="fa fa-search"></i></button></input>
-      	</form>
-      </div>
+  <a class="navbar-brand" href="/">Werewolf <i class="fab fa-wolf-pack-battalion"></i></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
+    aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarColor01">
+    <ul class="navbar-nav nav-fill w-100">
+      <li class="nav-item {{ 'active' if active_page == 'home' else '' }}">
+        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+      </li>
+      <li class="nav-item {{ 'active' if active_page == 'whatIs' else '' }}">
+        <a class="nav-link" href="#"><i class="fas fa-question-circle"></i> What is Werewolf?</a>
+      </li>
+      <li class="nav-item {{ 'active' if active_page == 'game' else '' }}">
+        <a class="nav-link" href="game"><i class="fas fa-gamepad"></i> Play a Game</a>
+      </li>
+      {% if session['username'] %}
+      <li class="nav-item pull-right">
+        <a class="nav-link" href="login"><i class="fas fa-user"></i> {{session['username']}}</a>
+      </li>
+      {%else%}
+      <li class="nav-item pull-right {{ 'active' if active_page == 'login' else '' }}">
+        <a class="nav-link" href="login"><i class="fas fa-sign-in-alt"></i> Login</a>
+      </li>
       {% endif %}
+    </ul>
+    {% if active_page == 'stats' %}
+    <div>
+      <form action="/search" method="POST">
+        <input type="text" placeholder="Username" name="search_results"> <button type="submit"><i
+            class="fa fa-search"></i></button></input>
+      </form>
     </div>
-  </nav>
+    {% endif %}
+  </div>
+</nav>

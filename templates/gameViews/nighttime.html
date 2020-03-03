@@ -37,7 +37,7 @@
                     <h3>Night-time</h3>
                 </div>
                 <div class="card-body">
-                    <p class="mx-auto" id="description">{Insert Night-time Text Here}</h3>
+                    <p class="mx-auto" id="description">Close your eyes and sleep until morning!</p>
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center ">
@@ -54,6 +54,7 @@
                             </div>
                         </div>
                         <button class="btn btn-warning col-5" id="readyUp">OK</button>
+                        <!-- <button class="btn btn-warning col-5" id="wakeup">WAKE UP!</button> -->
                     </div>
                 </div>
             </div>
@@ -61,7 +62,11 @@
 
     </div>
     <script>
+
         var socket = io(); // declares the socket
+        let role = '{{ session["role"] }}';
+        socket.emit('join room');
+
         $(document).ready(function () {
             $( "#readyUp" ).click(function() {
                 $("#readyUp").prop("disabled",true);
@@ -69,11 +74,37 @@
                 socket.emit('im ready');
             });
 
-            socket.on('next screen', function (){
-                    console.log("All players ready!")
-                    window.location.href = "/results";
-                })
+            $("#wakeup").click(function() {
+                console.log("WAKING EVERYBODY UP!")
+                socket.emit('wake up');
+
+            });
+
         });
+
+        socket.on('seer event', function (){
+            console.log("STARTING SEER EVENT!");
+            if(role=="seer"){
+                window.location.href = "/specialRole";
+            }
+        })
+
+        socket.on('werewolf event', function (){
+            console.log("STARTING WEREWOLF EVENT!");
+            if(role=="headWerewolf"){
+                window.location.href = "/specialRole";
+            }
+        })
+
+        socket.on('wake up', function (){
+                window.location.href = "/daytime";
+        })
+
+        socket.on('next screen', function (){
+                    console.log("All players ready!")
+                    window.location.href = "/daytime";
+        })
+
     </script>
 
 

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+ <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+
+    <title>Game: Vote</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-center h-100 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{role}} Ability</h3>
+                </div>
+                <div class="card-body">
+                    <div class="container text-center">
+                        {% if role == "healer" %}
+                            <h3>Who do you not want to die?:</h3>
+                        {% elif role == "headWerewolf" %}
+                            <h3>Pick a player to kill:</h3>
+                        {% elif role == "seer" %}
+                            <h3>Whos role do you want to see?:</h3>
+                        {% endif %}
+                        <table id="names" class="table table-hover">
+                            {% for player in playerNames %}
+                            <tr>
+                                <!-- starts at player1 -->
+                                <td><button type="button" id="{{player['role']}}" class="btn btn-danger player">{{player['username']}}</button>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-center ">
+                        <div class="flip-card col-8">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <div class="row">
+                                        <p class="mx-auto">Hover for role</p>
+                                    </div>
+                                </div>
+                                <div class="flip-card-back">
+                                    <p>{{ session["role"] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-warning col-5" id="readyUp">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        var socket = io(); // declares the socket
+        $(document).ready(function () {
+            $(".player").click(function() {
+                let role = '{{role}}';
+                let player = $(this).html();
+                if(role=="healer"){
+                    socket.emit("player to heal",player,"{{roomId}}");
+                    socket.emit("start seer event");
+                    window.location.href = "/nighttime";
+                }
+                else if(role=="seer"){
+                    var id = $(this).attr('id'); // $(this) refers to button that was clicked
+                    alert(`${player} is a: ${id}`);
+                    socket.emit("start werewolf event");
+                    window.location.href = "/nighttime";
+                }
+                else if(role=="headWerewolf"){
+                    socket.emit("player to kill",player,"{{roomId}}");
+                    socket.emit("wake up");
+                    window.location.href = "/daytime";
+                }
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

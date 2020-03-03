@@ -37,7 +37,9 @@
                     <h3>Intro</h3>
                 </div>
                 <div class="card-body">
-                    <p class="mx-auto" id="description">{Insert Introduction Text Here}</h3>
+                    <p class="mx-auto" id="description">All is well in the village. Rumors of werewolves ravaging nearby towns have been heard, but they can't be true... Right?
+                        As you lay down in bed, you think that you hear a howl off in the distance.
+                    </p>
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center">
@@ -61,7 +63,7 @@
         </div>
 
     </div>
-    <script>
+    <script type="text/javascript">
         var socket = io(); // declares the socket
         $(document).ready(function () {
             $( "#readyUp" ).click(function() {
@@ -72,7 +74,14 @@
 
             socket.on('next screen', function (){
                     console.log("All players ready!")
-                    window.location.href = "/daytime";
+                    let role = '{{session["role"]}}';
+                    if(role=="healer"){
+                        window.location.href = "/specialRole";
+                    }
+                    else{
+                        window.location.href = "/nighttime";
+                    }
+                    
                 })
         });
     </script>
