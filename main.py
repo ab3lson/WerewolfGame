@@ -474,8 +474,8 @@ def page_not_found(error):
    return render_template('404.html'), 404
 
 if __name__ == "__main__":
-    handler = RotatingFileHandler('../backups/werewolfConnection.log', maxBytes=100000, backupCount=3)
-    logger = logging.getLogger('tdm')
+    handler = RotatingFileHandler("../backups/werewolfConnection.log", maxBytes=100000, backupCount=3)
+    logger = logging.getLogger("tdm")
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
-    socketio.run(app, host='0.0.0.0',port=3088, log_output=True, debug=True)
+    socketio.run(app, host="0.0.0.0",port=3088, log_output=False, debug=True)
