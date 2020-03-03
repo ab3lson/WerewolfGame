@@ -162,6 +162,21 @@ def stats():
     except:
         return redirect("/")
 
+@app.route("/search", methods=["POST"])
+def search():
+    try:
+        if session["loggedIn"]:
+            cur = get_db().cursor()
+            cur.execute("SELECT * FROM `User` RIGHT JOIN `Stats` ON User.UserId=Stats.UserId where SOUNDEX(`username`) = SOUNDEX(%s)",(request.form['search_results']))
+            result = cur.fetchall()
+            cur.close()
+            search = None
+            search = result[0]
+            # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
+            return render_template("search.html",search=search)
+    except:
+        return redirect("/")
+
 @app.route("/signout")
 def signout():
     cur = get_db().cursor()

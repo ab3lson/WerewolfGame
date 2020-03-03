@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 26, 2020 at 02:58 PM
+-- Generation Time: Feb 26, 2020 at 03:08 PM
 -- Server version: 5.7.29-0ubuntu0.18.04.1
 -- PHP Version: 7.2.24-0ubuntu0.18.04.2
 
@@ -59,8 +59,7 @@ CREATE TABLE `Lobby` (
 --
 
 CREATE TABLE `Roles` (
-	  `RoleId` int(11) NOT NULL,
-	  `RoleName` varchar(50) NOT NULL,
+	  `Role` varchar(50) NOT NULL,
 	  `RoleDescription` varchar(1000) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -68,11 +67,11 @@ CREATE TABLE `Roles` (
 -- Dumping data for table `Roles`
 --
 
-INSERT INTO `Roles` (`RoleId`, `RoleName`, `RoleDescription`) VALUES
-(1, 'villager', 'Your role is to determine who the werewolf is and chase them out.'),
-(2, 'seer', 'During the night phase you will choose one person.\r\nIt will be revealed to you whether they are a werewolf or not.\r\n'),
-(3, 'healer', 'During the night phase you will choose one person.\r\nThat person will be protected from being killed by the werewolf.\r\n'),
-(4, 'werewolf', 'During the night phase you will select one person.\r\nThat person will be killed.\r\nIf there are multiple Werewolves, you will decide together who to kill.\r\n');
+INSERT INTO `Roles` (`Role`, `RoleDescription`) VALUES
+('healer', 'During the night phase you will choose one person.\r\nThat person will be protected from being killed by the werewolf.\r\n'),
+('seer', 'During the night phase you will choose one person.\r\nIt will be revealed to you whether they are a werewolf or not.\r\n'),
+('villager', 'Your role is to determine who the werewolf is and chase them out.'),
+('werewolf', 'During the night phase you will select one person.\r\nThat person will be killed.\r\nIf there are multiple Werewolves, you will decide together who to kill.\r\n');
 
 -- --------------------------------------------------------
 
@@ -141,7 +140,7 @@ ALTER TABLE `Lobby`
 -- Indexes for table `Roles`
 --
 ALTER TABLE `Roles`
-  ADD PRIMARY KEY (`RoleId`);
+  ADD PRIMARY KEY (`Role`);
 
 --
 -- Indexes for table `Stats`
@@ -170,11 +169,6 @@ ALTER TABLE `ActiveGames`
 --
 ALTER TABLE `Lobby`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT for table `Roles`
---
-ALTER TABLE `Roles`
-  MODIFY `RoleId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `User`
 --
