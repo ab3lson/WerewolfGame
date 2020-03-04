@@ -36,25 +36,25 @@
                     <h3>Daytime</h3>
                 </div>
                 <div class="card-body">
-                    {% if playerKilled %}
+                    {% if playersKilled %}
                     <p class="mx-auto" id="description">You wake up in the morning and see that somebody has been slaughtered! Who do you think did it?</p>
+                    <table id="deadPlayers" class="table table-hover">
+                        <tr><th>Deceased Player</th><th>Role</th></tr>
+                        {% for player in playersKilled %}
+                            <tr>
+                                <td>{{ player['username'] }}</td>
+                                <td>{{ player['role'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                     {% else %}
                     <p class="mx-auto" id="description">You wake up in the morning and see that nobody has died! What a good day! Sadly, somebody here is a werewolf - Who do you think it is?</p>
                     {% endif %}
-                    <table id="deadPlayers" class="table table-hover">
-                        <tr><th>Deceased Player</th><th>Role</th></tr>
-                    {% for player in playersKilled %}
-                        <tr>
-                            <td>{{ player['username'] }}</td>
-                            <td>{{ player['role'] }}</td>
-                        </tr>
-                    {% endfor %}
-                    </table>
                     <div class="container text-center">
                         <table id="names" class="table table-hover">
                             {% for player in alivePlayers %}
                             <tr>
-                                <td><button type="button" class="btn btn-danger">{{player}}</button>
+                                <td><button type="button" id="{{player}}{{loop.index}}" class="btn btn-danger">{{player}}</button>
                             </tr>
                             <!-- give each button an id of the user as well to track votes -->
                             {% endfor %}

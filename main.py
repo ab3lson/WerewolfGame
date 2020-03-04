@@ -36,7 +36,8 @@ def get_db():
 
 def apply_role(role,playerList):
     while True: #will loop until a role is assigned
-        randomPlayer = random.randrange(0,len(playerList))
+        # randomPlayer = random.randrange(0,len(playerList)) #real code
+        randomPlayer = random.randrange(0,3) #assigns first three players the roles
         if playerList[randomPlayer]["role"] == "villager":
             playerList[randomPlayer]["role"] = role
             print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
@@ -401,13 +402,14 @@ def daytime():
                 if session["roomId"] == game["roomId"]:
                     for player in game["gameLogic"]:
                         if player["isAlive"] == "0":
-                            playerKilled.append({"username":player["username"], "role": player["role"]})
+                            playersKilled.append({"username":player["username"], "role": player["role"]})
                         else:
                             userList.append(player["username"])
                         player["specialUsed"] = "0"
                         player["chosenByHealer"] = "0"
             return render_template("gameViews/daytime.html",alivePlayers=userList,playersKilled=playersKilled)
-    except:
+    except Exception as e:
+        print("***ERROR: error in daytime route:",e)
         return redirect("/login")
 
 @app.route("/nighttime")
