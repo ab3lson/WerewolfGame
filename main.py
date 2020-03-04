@@ -393,12 +393,22 @@ def intro():
 
 @app.route("/daytime")
 def daytime():
-    # try:
-    #     if session["loggedIn"] and session["roomId"]:
-    #         return render_template("create.html")
-    # except:
-    #     return redirect("/login")
-    return render_template("gameViews/daytime.html")
+    try:
+        if session["loggedIn"] and session["roomId"]:
+            userList = []
+            playersKilled = []
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    for player in game["gameLogic"]:
+                        if player["isAlive"] == "0":
+                            playerKilled.append({"username":player["username"], "role": player["role"]})
+                        else:
+                            userList.append(player["username"])
+                        player["specialUsed"] = "0"
+                        player["chosenByHealer"] = "0"
+            return render_template("gameViews/daytime.html",alivePlayers=userList,playersKilled=playersKilled)
+    except:
+        return redirect("/login")
 
 @app.route("/nighttime")
 def nighttime():
@@ -417,7 +427,7 @@ def nighttime():
                             werewolfAlive = True
                         elif player["role"] == "seer" and player["isAlive"] == "1":
                             seerAlive = True
-                        #checks to see if healer has already made a decision
+            #checks to see if healer has already made a decision
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     for player in game["gameLogic"]:
