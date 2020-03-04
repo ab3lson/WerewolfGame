@@ -57,7 +57,9 @@
                 </div>
             </div>
         </div>
-
+	<br></br><br></br>
+          <div id="countdown" class="timer">30<br></br></div>
+	</div>
     </div>
     <script>
         var socket = io(); // declares the socket
@@ -73,9 +75,27 @@
                     window.location.href = "/vote";
                 })
         });
+
+	var seconds;
+	var temp;
+
+	function countdown() {
+		seconds = document.getElementById('countdown').innerHTML;
+		seconds = parseInt(seconds, 10)
+
+		if (seconds == 1) {
+			window.location.href="/nighttime"
+		}
+
+		seconds--;
+		temp = document.getElementById('countdown');
+		temp.innerHTML = seconds;
+		timeoutMyOswego = setTimeout(countdown, 1000);
+	};
+
+	countdown();
+
     </script>
-
-
 
 </body>
 

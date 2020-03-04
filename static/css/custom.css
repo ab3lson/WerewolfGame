@@ -59,3 +59,8 @@
     color: white;
     transform: rotateY(180deg);
   }
+
+  .timer {
+    text-align: center;
+    font-size: xx-large;
+  }
