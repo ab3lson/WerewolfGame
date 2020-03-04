@@ -317,7 +317,7 @@ def lobby():
                     if game["roomId"] == session["roomId"]:
                         game["gameLogic"] = []
                         for player in game["players"]:
-                            game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0", "chosenByHealer":"0"})
+                            game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0", "chosenByHealer":"0", "specialUsed": "0"})
                         assign_roles(game) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 print(f"Player count reached for {session['roomId']}... REDIRECTING!")
@@ -404,6 +404,41 @@ def daytime():
 def nighttime():
     try:
         if session["loggedIn"] and session["roomId"]:
+            werewolfAlive = False
+            healerAlive = False
+            seerAlive = False
+            alreadyGone = False
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    for player in game["gameLogic"]:
+                        if player["role"] == "healer" and player["isAlive"] == "1":
+                            healerAlive = True
+                        elif player["role"] == "headWerewolf" and player["isAlive"] == "1":
+                            werewolfAlive = True
+                        elif player["role"] == "seer" and player["isAlive"] == "1":
+                            seerAlive = True
+                        #checks to see if healer has already made a decision
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    for player in game["gameLogic"]:
+                        if player["specialUsed"] == "1":
+                            alreadyGone = True
+            if not alreadyGone and session["role"]=="healer" and healerAlive:
+                return redirect("specialRole")
+            elif not alreadyGone and session["role"]=="seer" and not healerAlive and seerAlive:
+                return redirect("specialRole")
+            elif not alreadyGone and session["role"]=="headWerewolf" and not healerAlive and not seerAlive:
+                return redirect("specialRole")
+            else:
+                return render_template("gameViews/nighttime.html")
+    except:
+        return redirect("/login")
+
+""" #OLD Nighttime logic
+@app.route("/nighttime")
+def nighttime():
+    try:
+        if session["loggedIn"] and session["roomId"]:
             #checks to see if healer has already made a decision
             if session["role"] == "healer":
                 alreadyGone = False
@@ -420,7 +455,7 @@ def nighttime():
                 return render_template("gameViews/nighttime.html")
     except:
         return redirect("/login")
-
+"""
 @app.route("/specialRole")
 def specialRole():
     try:
@@ -431,6 +466,9 @@ def specialRole():
         for game in GAMES:
             if session["roomId"] == game["roomId"]:
                 userList=game["gameLogic"]
+                for player in game["gameLogic"]:
+                    if session["username"] == player["username"]:
+                        player["specialUsed"]="1"
         return render_template("gameViews/specialRole.html",playerNames=userList,role=session["role"])
         
     except Exception as e:
