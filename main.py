@@ -67,8 +67,6 @@ def assign_roles(game):
 
 def create_active_game(game):
     cur = get_db().cursor()
-    #game: {"roomId":session["roomId"],"players":[session["username"]],"playersNeeded":request.form["playersNeeded"],"decisionTimer":decisionSeconds}
-    #Gamelogic: {"username":player, "role":"villager", "isAlive":"1", "isReady":"0"}
     roomId = game["roomId"]
     decisionTimer = game["decisionTimer"]
     print("ADDING TO ActiveGames in DB!")
@@ -77,6 +75,24 @@ def create_active_game(game):
         cur.execute("INSERT INTO ActiveGames (Username, RoomId, Role, DecisionTimer) VALUES (%s, %s, %s, %s)",(player["username"], roomId, player["role"], decisionTimer))
     cur.close()
     return
+
+def checkWinConditions(game):
+    villagerCount = 0
+    werewolfCount = 0
+    winCond = False
+    for player in game:
+        if player["role"] != "werewolf" and player["role"] != "headWerewolf" and player["isAlive"] == "1":
+            villagerCount += 1
+        elif player["role"] == "werewolf" or player["role"] == "headWerewolf":
+            if player["isAlive"] == "1":
+                werewolfCount += 1
+    if werewolfCount < 1:
+        winCond = "Villagers"
+        # print("Victory! Villagers win!")
+    if villagerCount < 2:
+        winCond = "Werewolves"
+        # print("Victory! Werewolves win!")
+    return winCond
 
 GAMES = [] #holds all active games with "roomId" and "players" - list of players
 
@@ -318,7 +334,7 @@ def lobby():
                     if game["roomId"] == session["roomId"]:
                         game["gameLogic"] = []
                         for player in game["players"]:
-                            game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0", "chosenByHealer":"0", "specialUsed": "0"})
+                            game["gameLogic"].append({"username":player, "role":"villager", "isAlive":"1", "isReady":"0", "chosenByHealer":"0", "specialUsed": "0", "killVotes":0})
                         assign_roles(game) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 print(f"Player count reached for {session['roomId']}... REDIRECTING!")
@@ -387,6 +403,7 @@ def pregame():
 def intro():
     try:
         if session["loggedIn"] and session["roomId"]:
+            session["isAlive"] = "1"
             return render_template("gameViews/intro.html")
     except:
         return redirect("/login")
@@ -395,19 +412,29 @@ def intro():
 @app.route("/daytime")
 def daytime():
     try:
-        if session["loggedIn"] and session["roomId"]:
-            userList = []
+        if session["loggedIn"] and session["roomId"]:                     
+            alivePlayers = []
             playersKilled = []
+            winCheck = False
+            werewolfAlive = True
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
+                    winCheck = checkWinConditions(game["gameLogic"])
+                    if winCheck:                        
+                        return redirect("results")
                     for player in game["gameLogic"]:
+                        if player["username"] == session["username"] and player["isAlive"] == "0":
+                            print(f"{session['username']} is dead. Removing from game.")
+                            session.pop("roomId",None)
+                            session.pop("role",None)
+                            return redirect("/")
                         if player["isAlive"] == "0":
                             playersKilled.append({"username":player["username"], "role": player["role"]})
                         else:
-                            userList.append(player["username"])
+                            alivePlayers.append(player["username"])
                         player["specialUsed"] = "0"
                         player["chosenByHealer"] = "0"
-            return render_template("gameViews/daytime.html",alivePlayers=userList,playersKilled=playersKilled)
+            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled)
     except Exception as e:
         print("***ERROR: error in daytime route:",e)
         return redirect("/login")
@@ -423,6 +450,9 @@ def nighttime():
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     for player in game["gameLogic"]:
+                        if player["username"] == session["username"] and player["role"] == "headWerewolf" and player["specialUsed"] == "1":
+                            socketio.emit('wake up', room=session["roomId"])
+                            return redirect("/daytime")
                         if player["role"] == "healer" and player["isAlive"] == "1":
                             healerAlive = True
                         elif player["role"] == "headWerewolf" and player["isAlive"] == "1":
@@ -435,6 +465,11 @@ def nighttime():
                     for player in game["gameLogic"]:
                         if player["specialUsed"] == "1":
                             alreadyGone = True
+                        if player["username"] == session["username"] and player["isAlive"] == "0":
+                            print(f"{session['username']} is dead. Removing from game.")
+                            session.pop("roomId",None)
+                            session.pop("role",None)
+                            return redirect("/")
             if not alreadyGone and session["role"]=="healer" and healerAlive:
                 return redirect("specialRole")
             elif not alreadyGone and session["role"]=="seer" and not healerAlive and seerAlive:
@@ -443,31 +478,12 @@ def nighttime():
                 return redirect("specialRole")
             else:
                 return render_template("gameViews/nighttime.html")
+        else:
+            #redirect to home, because the player is dead
+            return redirect("/")
     except:
         return redirect("/login")
 
-""" #OLD Nighttime logic
-@app.route("/nighttime")
-def nighttime():
-    try:
-        if session["loggedIn"] and session["roomId"]:
-            #checks to see if healer has already made a decision
-            if session["role"] == "healer":
-                alreadyGone = False
-                for game in GAMES:
-                    if session["roomId"] == game["roomId"]:
-                        for player in game["gameLogic"]:
-                            if player["chosenByHealer"] == "1":
-                                alreadyGone = True
-                if alreadyGone == True:
-                    return render_template("gameViews/nighttime.html")
-                #play noise for healer to open their eyes since they get directed to this screen right away
-                return redirect("specialRole")
-            else:
-                return render_template("gameViews/nighttime.html")
-    except:
-        return redirect("/login")
-"""
 @app.route("/specialRole")
 def specialRole():
     try:
@@ -487,23 +503,40 @@ def specialRole():
         print("**ERROR in specialRole route:",e)
         return redirect("/nighttime")
 
-@app.route("/vote")
+@app.route("/voteResults")
 def vote():
-    # try:
-    #     if session["loggedIn"] and session["roomId"]:
-    #         return render_template("create.html")
-    # except:
-    #     return redirect("/login")
-    return render_template("gameViews/vote.html")
+    try:
+        isDead = False
+        winCheck = False
+        if session["loggedIn"] and session["roomId"]:
+            playersKilled = []
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    winCheck = checkWinConditions(game["gameLogic"])
+                    if winCheck:
+                        return redirect("/results")
+                    for player in game["gameLogic"]:
+                        if player["isAlive"] == "0":
+                            playersKilled.append({"username":player["username"], "role": player["role"]})
+                        if player["username"] == session["username"] and player["isAlive"] == "0":
+                            isDead = True
+            return render_template("gameViews/voteResults.html",playersKilled=playersKilled,isDead=isDead)
+    except Exception as e:
+        print("**ERROR in voteResults route:",e)
+        return redirect("/daytime")
 
 @app.route("/results")
 def results():
-    # try:
-    #     if session["loggedIn"] and session["roomId"]:
-    #         return render_template("create.html")
-    # except:
-    #     return redirect("/login")
-    return render_template("gameViews/results.html")
+    try:
+        if session["loggedIn"] and session["roomId"]:
+            winType = False
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    winType = checkWinConditions(game["gameLogic"])
+            return render_template("gameViews/results.html",winType = winType)
+    except Exception as e:
+        print("***ERROR: error in results route:",e)
+        return redirect("/login")
 
 @app.route("/sessionDestroy")
 def sessionDestroy():
@@ -538,6 +571,8 @@ def readyUp():
     for game in GAMES:
         if session["roomId"] == game["roomId"]:
             for player in game["gameLogic"]:
+                if player["isAlive"] == "0": #dead players are always ready
+                    player["isReady"] = "1"
                 if player["username"] == session["username"]:
                     player["isReady"] = "1"  
             for player in game["gameLogic"]:
@@ -548,12 +583,15 @@ def readyUp():
         for game in GAMES:
             if session["roomId"] == game["roomId"]:
                 for player in game["gameLogic"]:
-                        player["isReady"] = "0"  
+                        if player["isAlive"] == "0": #dead players are always ready
+                            player["isReady"] = "1"
+                        else:
+                            player["isReady"] = "0"
         print("All players are ready! Changing screens...")
         print("Sending 'next screen' to {}".format(session["roomId"]))
         emit("next screen", room=session["roomId"])
     else:
-        print("Not all players are ready yet... waiting in lobby")
+        print("Not all players are ready yet...")
 
 @socketio.on('player to heal')
 def healPlayer(username, roomId):
@@ -581,15 +619,63 @@ def killPlayer(username, roomId):
                     else:
                         print(f"{username} was saved by the healer!")
 
+@socketio.on('cast vote')
+def castVote(username, roomId):
+    print(f"Vote cast against: {username}!")
+    join_room(roomId)
+    userList = None
+    allReady = True
+    voteToKill = None
+    tempHighest = 0
+    for game in GAMES:
+        if session["roomId"] == game["roomId"]:
+            for player in game["gameLogic"]:
+                if player["isAlive"] == "0": #dead players are always ready
+                    player["isReady"] = "1"
+                if player["username"] == username:
+                    player["killVotes"] += 1
+                if player["username"] == session["username"]:
+                    player["isReady"] = "1"
+                if player["isReady"] != "1":
+                    allReady = False
+    if allReady == True:
+        #finds the player with the most votes
+        for game in GAMES:
+            if session["roomId"] == game["roomId"]:
+                for player in game["gameLogic"]:
+                    if player["killVotes"] > tempHighest:
+                        voteToKill = player["username"]
+                        tempHighest = player["killVotes"]
+        #resets votes and not ready status
+        for game in GAMES:
+            if session["roomId"] == game["roomId"]:
+                for player in game["gameLogic"]:
+                        player["isReady"] = "0"
+                        player["killVotes"] = 0
+                        if player["username"] == voteToKill:
+                            player["isAlive"] = "0"
+        print(f"{voteToKill} has been killed by the vote!")
+        print("All players are have cast their vote! Changing screens...")
+        emit("next screen", room=session["roomId"])
+
 @socketio.on('join room')
 def joinRoom():
-    join_room(session["roomId"])
+    join_room(session["roomId"])    
 
 @socketio.on('start seer event')
 def seerStart():
     print("Starting seer event!")
     join_room(session["roomId"])
-    emit("seer event", room=session["roomId"])
+    for game in GAMES:
+        if session["roomId"] == game["roomId"]:
+            for player in game["gameLogic"]:
+                if player["role"] == "seer" and player["isAlive"] == "0": #skips over seer if they are dead
+                    print("Skipping seer, because they are dead.")
+                    emit("werewolf event", room=session["roomId"])
+                else:
+                    emit("seer event", room=session["roomId"])
+    
+    
 
 @socketio.on('start werewolf event')
 def werewolfStart():

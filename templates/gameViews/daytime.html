@@ -54,7 +54,7 @@
                         <table id="names" class="table table-hover">
                             {% for player in alivePlayers %}
                             <tr>
-                                <td><button type="button" id="{{player}}{{loop.index}}" class="btn btn-danger">{{player}}</button>
+                                <td><button type="button" id="{{player}}{{loop.index}}" class="btn btn-danger player">{{player}}</button>
                             </tr>
                             <!-- give each button an id of the user as well to track votes -->
                             {% endfor %}
@@ -83,6 +83,8 @@
     </div>
     <script>
         var socket = io(); // declares the socket
+        socket.emit('join room');
+
         $(document).ready(function () {
             $( "#readyUp" ).click(function() {
                 $("#readyUp").prop("disabled",true);
@@ -92,8 +94,18 @@
 
             socket.on('next screen', function (){
                     console.log("All players ready!")
-                    window.location.href = "/nighttime";
+                    window.location.href = "/voteResults";
                 })
+
+                $(".player").click(function() {
+                let role = '{{role}}';
+                let player = $(this).html();
+                socket.emit('cast vote',player,"{{roomId}}");
+                $("#names").empty();
+                $("#readyUp").prop("disabled",true);
+                $("#readyUp").html('Wait...');
+                })
+
         });
     </script>
 
