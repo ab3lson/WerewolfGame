@@ -415,6 +415,7 @@ def daytime():
         if session["loggedIn"] and session["roomId"]:                     
             alivePlayers = []
             playersKilled = []
+            decisionTimer = game["decisionTimer"]
             winCheck = False
             werewolfAlive = True
             for game in GAMES:
@@ -434,7 +435,7 @@ def daytime():
                             alivePlayers.append(player["username"])
                         player["specialUsed"] = "0"
                         player["chosenByHealer"] = "0"
-            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled)
+            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled,decisionTimer=decisionTimer)
     except Exception as e:
         print("***ERROR: error in daytime route:",e)
         return redirect("/login")
