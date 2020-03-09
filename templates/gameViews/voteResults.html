@@ -33,19 +33,19 @@
         <div class="d-flex justify-content-center h-100 mt-4">
             <div class="card">
                 <div class="card-header">
-                    <h3>Vote to kill</h3>
+                    <h3>Vote Results</h3>
                 </div>
                 <div class="card-body">
-                    <div class="container text-center">
-                        <table id="names" class="table table-hover">
-                            {% for player in playerNames %}
+                    <p class="mx-auto" id="description">The town has spoken. Here are the results of your vote.</p>
+                    <table id="deadPlayers" class="table table-hover">
+                        <tr><th>Deceased Player</th><th>Role</th></tr>
+                        {% for player in playersKilled %}
                             <tr>
-                                <td><button type="button" class="btn btn-danger">{{player}}</button>
+                                <td>{{ player['username'] }}</td>
+                                <td>{{ player['role'] }}</td>
                             </tr>
-                            <!-- give each button an id of the user as well to track votes -->
-                            {% endfor %}
-                        </table>
-                    </div>
+                        {% endfor %}
+                    </table>
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center ">
@@ -74,9 +74,13 @@
         var socket = io(); // declares the socket
         $(document).ready(function () {
             $( "#readyUp" ).click(function() {
+                {% if isDead %}
+                    window.location.href = "/";
+                {% else %}
                 $("#readyUp").prop("disabled",true);
                 $("#readyUp").html('Wait...');
                 socket.emit('im ready');
+                {% endif %}
             });
 
             socket.on('next screen', function (){

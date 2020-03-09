@@ -38,11 +38,17 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-row">
-                        <p class="mx-auto" id="win">{Insert Win or Lose here!}</p>
+                        <p class="mx-auto" id="win">{{winType}} won!</p>
                     </div>
+                    {% if winType == 'Villagers' %}
                     <div class="d-flex flex-row">
-                        <p class="mx-auto" id="results">{Insert Results Text Here!}</p>
+                        <p class="mx-auto" id="results">The villagers succeded in slaying the werewolves! Congratulations!</p>
                     </div>
+                    {% else %}
+                    <div class="d-flex flex-row">
+                        <p class="mx-auto" id="results">Those werewolves sure are sneaky! Better luck next time villagers.</p>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-center">

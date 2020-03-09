@@ -46,10 +46,11 @@
                         {% endif %}
                         <table id="names" class="table table-hover">
                             {% for player in playerNames %}
+                            {% if player['isAlive'] == "1" %}
                             <tr>
-                                <!-- starts at player1 -->
                                 <td><button type="button" id="{{player['role']}}" class="btn btn-danger player">{{player['username']}}</button>
                             </tr>
+                            {% endif %}
                             {% endfor %}
                         </table>
                     </div>
@@ -68,7 +69,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-warning col-5" id="readyUp">OK</button>
+                        <button class="btn btn-warning col-5">OK</button>
                     </div>
                 </div>
             </div>
@@ -97,8 +98,8 @@
                 }
                 else if(role=="headWerewolf"){
                     socket.emit("player to kill",player,"{{roomId}}");
-                    socket.emit("wake up");
-                    window.location.href = "/daytime";
+                    // socket.emit("wake up");
+                    window.location.href = "/nighttime";
                 }
             });
         });
