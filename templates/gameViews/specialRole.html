@@ -118,7 +118,7 @@
                     socket.emit("start seer event");
                     window.location.href = "/nighttime";
                 }
-			else if("{{session['role]}}'=="seer"){
+			else if("{{session['role']}}"=="seer"){
                     socket.emit("start werewolf event");
                     window.location.href = "/nighttime";
                 }
