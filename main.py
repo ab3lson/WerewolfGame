@@ -434,7 +434,7 @@ def daytime():
                             alivePlayers.append(player["username"])
                         player["specialUsed"] = "0"
                         player["chosenByHealer"] = "0"
-            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled)
+            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled,decisionTimer=decisionTimer)
     except Exception as e:
         print("***ERROR: error in daytime route:",e)
         return redirect("/login")
@@ -493,11 +493,12 @@ def specialRole():
         userList = None
         for game in GAMES:
             if session["roomId"] == game["roomId"]:
+                decisionTimer = game["decisionTimer"]
                 userList=game["gameLogic"]
                 for player in game["gameLogic"]:
                     if session["username"] == player["username"]:
                         player["specialUsed"]="1"
-        return render_template("gameViews/specialRole.html",playerNames=userList,role=session["role"])
+        return render_template("gameViews/specialRole.html",playerNames=userList,role=session["role"], decisionTimer=decisionTimer)
         
     except Exception as e:
         print("**ERROR in specialRole route:",e)
@@ -691,7 +692,6 @@ def wakeUp():
         emit("wake up", room=session["roomId"])
     except Exception as e:
         print("ERROR:",e)
-
 
 @app.errorhandler(404)
 def page_not_found(error):

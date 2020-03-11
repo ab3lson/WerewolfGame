@@ -9,3 +9,5 @@ git reset --hard && git pull
 
 View entire connection log since last boot:
 journalctl -u werewolf.service
+
+git pull upstream master

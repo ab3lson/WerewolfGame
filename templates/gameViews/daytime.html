@@ -33,7 +33,7 @@
         <div class="d-flex justify-content-center h-100 mt-4">
             <div class="card">
                 <div class="card-header">
-                    <h3>Daytime</h3>
+			<h3>Daytime {{ session["username"] }}</h3>
                 </div>
                 <div class="card-body">
                     {% if playersKilled %}
@@ -79,7 +79,7 @@
                 </div>
             </div>
         </div>
-
+	</div>
     </div>
     <script>
         var socket = io(); // declares the socket
@@ -107,9 +107,28 @@
                 })
 
         });
+
+	var seconds;
+	var temp;
+
+	function countdown() {
+		seconds = document.getElementById('countdown').innerHTML;
+		seconds = parseInt(seconds, 10)
+
+		if (seconds == 1) {
+			socket.emit('vote timeout',"{{ session['username']}}","{{roomId}}");
+			window.location.href="/voteResults"
+		}
+
+		seconds--;
+		temp = document.getElementById('countdown');
+		temp.innerHTML = seconds;
+		timeoutMyOswego = setTimeout(countdown, 1000);
+	};
+
+	countdown();
+
     </script>
-
-
 
 </body>
 
