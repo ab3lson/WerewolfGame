@@ -434,7 +434,7 @@ def daytime():
                             alivePlayers.append(player["username"])
                         player["specialUsed"] = "0"
                         player["chosenByHealer"] = "0"
-            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled,decisionTimer=decisionTimer)
+            return render_template("gameViews/daytime.html",alivePlayers=alivePlayers,playersKilled=playersKilled)
     except Exception as e:
         print("***ERROR: error in daytime route:",e)
         return redirect("/login")
