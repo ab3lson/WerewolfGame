@@ -184,7 +184,8 @@ def stats():
                 return render_template("game.html",error=error)
             # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
             return render_template("stats.html",stats=stats)
-    except:
+    except Exception as e:
+        print("**ERROR in stats route:",e)
         return redirect("/")
 
 @app.route("/search", methods=["POST"])
