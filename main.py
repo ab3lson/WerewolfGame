@@ -55,11 +55,11 @@ def assign_roles(game):
     #logic to assign roles based on rules
     # print("Players and roles before assignments:",game["gameLogic"])
     # print("PLAYERS NEEDED:",int(game["playersNeeded"]))
-    if 6<= int(game["playersNeeded"]) <=9:
+    if 6<= int(game["playersNeeded"]) <=7: ##change back to 6-9
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
         apply_role("healer",game["gameLogic"])
-    if 10<= int(game["playersNeeded"]) <=13:
+    if 8<= int(game["playersNeeded"]) <=13: ##change back to 10-13
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("werewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
