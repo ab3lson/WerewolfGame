@@ -55,7 +55,7 @@ def assign_roles(game):
     #logic to assign roles based on rules
     # print("Players and roles before assignments:",game["gameLogic"])
     # print("PLAYERS NEEDED:",int(game["playersNeeded"]))
-    if 6<= int(game["playersNeeded"]) <=7: ##change back to 6-9
+    if 1<= int(game["playersNeeded"]) <=7: ##change back to 6-9
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
         apply_role("healer",game["gameLogic"])
@@ -651,6 +651,12 @@ def killPlayer(username, roomId, werewolfName):
                     if player["chosenByHealer"] != "1":
                         player["isAlive"] = "0"
                         print(f"{username} was killed by the werewolf!")
+                        if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
+                            print("THE HEAD WEREWOLF DIED!!")
+                            for player in game["gameLogic"]:
+                                if player["role"] == "werewolf":
+                                    player["role"] = "headWerewolf"
+                                    break #exits loop once first werewolf is promoted
                         cur = get_db().cursor()
                         cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET PeopleEaten=PeopleEaten+1 WHERE Username = %s",(werewolfName))
                         cur.close()
@@ -696,6 +702,7 @@ def castVote(username, roomId):
                         if player["username"] == voteToKill:
                             player["isAlive"] = "0"
                             if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
+                                print("THE HEAD WEREWOLF DIED!!")
                                 for player in game["gameLogic"]:
                                     if player["role"] == "werewolf":
                                         player["role"] = "headWerewolf"
