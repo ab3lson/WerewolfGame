@@ -41,6 +41,14 @@ def apply_role(role,playerList):
         if playerList[randomPlayer]["role"] == "villager":
             playerList[randomPlayer]["role"] = role
             print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
+            cur = get_db().cursor()
+            if role == "seer":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesSeer=TimesSeer+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            elif role == "headWerewolf" or role == "werewolf":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesWerewolf=TimesWerewolf+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            elif role == "healer":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesDoctor=TimesDoctor+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            cur.close()
             break
 
 def assign_roles(game):
@@ -534,6 +542,26 @@ def results():
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     winType = checkWinConditions(game["gameLogic"])
+                    if session["role"] == "headWerewolf": #only updates the stats once (ghetto but it works)
+                        for player in game["gameLogic"]: #increments games played
+                            if "Guest#" not in player["username"]:
+                                cur = get_db().cursor()
+                                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesPlayed=GamesPlayed+1 WHERE Username = %s",(player["username"]))
+                                cur.close()
+                        if winType == "Villagers": #increments games won if villagers won
+                            for player in game["gameLogic"]:
+                                if "Guest#" not in player["username"]:
+                                    if player["role"] == "villager" and player["isAlive"] == "1":
+                                        cur = get_db().cursor()
+                                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
+                                        cur.close()
+                        elif winType == "Werewolves": #increments games won if werewolves won
+                            for player in game["gameLogic"]:
+                                if "Guest#" not in player["username"]:
+                                    if (player["role"] == "headWerewolf" or player["role"] == "werewolf") and player["isAlive"] == "1":
+                                        cur = get_db().cursor()
+                                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
+                                        cur.close()
             return render_template("gameViews/results.html",winType = winType)
     except Exception as e:
         print("***ERROR: error in results route:",e)
@@ -606,10 +634,16 @@ def healPlayer(username, roomId):
                     player["chosenByHealer"] = "1"
 
 @socketio.on('player to kill')
-def killPlayer(username, roomId):
+def killPlayer(username, roomId, werewolfName):
     print(f"The werewolf chose to kill: {username}!")
     join_room(roomId)
     userList = None
+    healerName = ""
+    for game in GAMES:
+        if session["roomId"] == game["roomId"]:
+            for player in game["gameLogic"]:
+                if player["role"] == "healer":
+                    healerName = player["username"]
     for game in GAMES:
         if session["roomId"] == game["roomId"]:
             for player in game["gameLogic"]:
@@ -617,8 +651,14 @@ def killPlayer(username, roomId):
                     if player["chosenByHealer"] != "1":
                         player["isAlive"] = "0"
                         print(f"{username} was killed by the werewolf!")
+                        cur = get_db().cursor()
+                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET PeopleEaten=PeopleEaten+1 WHERE Username = %s",(werewolfName))
+                        cur.close()
                     else:
                         print(f"{username} was saved by the healer!")
+                        cur = get_db().cursor()
+                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET PeopleSaved=PeopleSaved+1 WHERE Username = %s",(healerName))
+                        cur.close()
 
 @socketio.on('cast vote')
 def castVote(username, roomId):
@@ -655,6 +695,11 @@ def castVote(username, roomId):
                         player["killVotes"] = 0
                         if player["username"] == voteToKill:
                             player["isAlive"] = "0"
+                            if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
+                                for player in game["gameLogic"]:
+                                    if player["role"] == "werewolf":
+                                        player["role"] == "headWerewolf"
+                                        break #exits loop once first werewolf is promoted
         print(f"{voteToKill} has been killed by the vote!")
         print("All players are have cast their vote! Changing screens...")
         emit("next screen", room=session["roomId"])
@@ -676,8 +721,6 @@ def seerStart():
                 else:
                     emit("seer event", room=session["roomId"])
     
-    
-
 @socketio.on('start werewolf event')
 def werewolfStart():
     print("Starting werewolf event!")

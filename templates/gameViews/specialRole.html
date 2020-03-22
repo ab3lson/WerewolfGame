@@ -97,7 +97,7 @@
                     window.location.href = "/nighttime";
                 }
                 else if(role=="headWerewolf"){
-                    socket.emit("player to kill",player,"{{roomId}}");
+                    socket.emit("player to kill",player,"{{roomId}}","{{session['username']}}");
                     // socket.emit("wake up");
                     window.location.href = "/nighttime";
                 }
