@@ -200,7 +200,8 @@ def search():
             search = result[0]
             # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
             return render_template("search.html",search=search)
-    except:
+    except Exception as e:
+        print("**ERROR in search route:",e)
         return redirect("/")
 
 @app.route("/signout")

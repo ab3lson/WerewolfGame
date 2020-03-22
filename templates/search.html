@@ -49,10 +49,10 @@
                 <td>Games Won:</td>
                 <td id="gamesWon">{{search["GamesWon"]}}</td>
               </tr>
-              {% if stats["GamesPlayed"] != 0 %}
+              {% if search["GamesPlayed"] != 0 %}
                 <tr>
                   <td>Win Ratio:</td>
-                  <td id="winRatio">{{stats["GamesWon"] / stats["GamesPlayed"]}}</td>
+                  <td id="winRatio">{{search["GamesWon"] / search["GamesPlayed"]}}</td>
                 </tr>
               {% else %}
                 <tr>
