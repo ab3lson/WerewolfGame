@@ -551,7 +551,7 @@ def results():
                         if winType == "Villagers": #increments games won if villagers won
                             for player in game["gameLogic"]:
                                 if "Guest#" not in player["username"]:
-                                    if player["role"] == "villager" and player["isAlive"] == "1":
+                                    if (player["role"] is not "werewolf" or player["role"] is not "headWerewolf")  and player["isAlive"] == "1":
                                         cur = get_db().cursor()
                                         cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
                                         cur.close()
