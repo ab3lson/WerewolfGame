@@ -156,7 +156,7 @@ def guestlogin():
     cur.execute("SELECT MAX(UserId) AS HighestID FROM User")
     highestId = cur.fetchone()
     guestId = int(highestId["HighestID"]) + 1
-    cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '0', '1')",('Guest#{}'.format(guestId),random.getrandbits(128)))
+    cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '1', '1')",('Guest#{}'.format(guestId),random.getrandbits(128)))
     cur.execute("SELECT UserId FROM User WHERE Username =%s",('Guest#{}'.format(guestId)))
     UserId = cur.fetchone()
     cur.close()
@@ -577,6 +577,11 @@ def results():
                         cur.close()
             session.pop("roomId",None) #deletes game session variables
             session.pop("role",None)
+            if "Guest#" in session["username"]: #deletes guest from user table and logs them out
+                session.clear()
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM User WHERE Username =  %s",(session["username"]))
+                cur.close()
             return render_template("gameViews/results.html",winType = winType)
     except Exception as e:
         print("***ERROR: error in results route:",e)
