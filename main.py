@@ -498,6 +498,13 @@ def nighttime():
                 return render_template("gameViews/nighttime.html")
         else:
             #redirect to home, because the player is dead
+            session.pop("roomId",None) #deletes game session variables
+            session.pop("role",None)
+            if "Guest#" in session["username"]: #deletes guest from user table and logs them out
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM User WHERE Username =  %s",(session["username"]))
+                cur.close()
+                session.clear()
             return redirect("/")
     except:
         return redirect("/login")
@@ -578,10 +585,10 @@ def results():
             session.pop("roomId",None) #deletes game session variables
             session.pop("role",None)
             if "Guest#" in session["username"]: #deletes guest from user table and logs them out
-                session.clear()
                 cur = get_db().cursor()
                 cur.execute("DELETE FROM User WHERE Username =  %s",(session["username"]))
                 cur.close()
+                session.clear()
             return render_template("gameViews/results.html",winType = winType)
     except Exception as e:
         print("***ERROR: error in results route:",e)
