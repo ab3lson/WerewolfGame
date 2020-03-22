@@ -551,6 +551,9 @@ def results():
                     winType = checkWinConditions(game["gameLogic"])
                     if session["role"] == "headWerewolf": #only updates the stats once (ghetto but it works)
                         for player in game["gameLogic"]: #increments games played
+                            cur = get_db().cursor()
+                            cur.execute("DELETE FROM ActiveGames WHERE Username = %s",(player["username"])) #deletes players from ActiveGames
+                            cur.close()
                             if "Guest#" not in player["username"]:
                                 cur = get_db().cursor()
                                 cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesPlayed=GamesPlayed+1 WHERE Username = %s",(player["username"]))
@@ -569,6 +572,11 @@ def results():
                                         cur = get_db().cursor()
                                         cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
                                         cur.close()
+                        cur = get_db().cursor()
+                        cur.execute("DELETE FROM Lobby WHERE RoomId =  %s",(session["roomId"])) #deletes game from lobby table
+                        cur.close()
+            session.pop("roomId",None) #deletes game session variables
+            session.pop("role",None)
             return render_template("gameViews/results.html",winType = winType)
     except Exception as e:
         print("***ERROR: error in results route:",e)
