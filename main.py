@@ -698,7 +698,7 @@ def castVote(username, roomId):
                             if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
                                 for player in game["gameLogic"]:
                                     if player["role"] == "werewolf":
-                                        player["role"] == "headWerewolf"
+                                        player["role"] = "headWerewolf"
                                         break #exits loop once first werewolf is promoted
         print(f"{voteToKill} has been killed by the vote!")
         print("All players are have cast their vote! Changing screens...")
