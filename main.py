@@ -458,6 +458,11 @@ def nighttime():
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     for player in game["gameLogic"]:
+                        if player["username"] == session["username"]:
+                            session["role"] = player["role"] #updates roles if werewolf got promoted to headWerewolf
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    for player in game["gameLogic"]:
                         if player["username"] == session["username"] and player["role"] == "headWerewolf" and player["specialUsed"] == "1":
                             socketio.emit('wake up', room=session["roomId"])
                             return redirect("/daytime")
