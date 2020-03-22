@@ -36,8 +36,8 @@ def get_db():
 
 def apply_role(role,playerList):
     while True: #will loop until a role is assigned
-        randomPlayer = random.randrange(0,len(playerList)) #real code
-        # randomPlayer = random.randrange(0,3) #assigns first three players the roles
+        #randomPlayer = random.randrange(0,len(playerList)) #real code
+        randomPlayer = random.randrange(0,3) #assigns first three players the roles
         if playerList[randomPlayer]["role"] == "villager":
             playerList[randomPlayer]["role"] = role
             print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
@@ -348,6 +348,9 @@ def lobby():
                         assign_roles(game) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 print(f"Player count reached for {session['roomId']}... REDIRECTING!")
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM Lobby WHERE RoomId =  %s",(session["roomId"])) #deletes game from lobby table
+                cur.close()
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
             else:
@@ -572,9 +575,6 @@ def results():
                                         cur = get_db().cursor()
                                         cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
                                         cur.close()
-                        cur = get_db().cursor()
-                        cur.execute("DELETE FROM Lobby WHERE RoomId =  %s",(session["roomId"])) #deletes game from lobby table
-                        cur.close()
             session.pop("roomId",None) #deletes game session variables
             session.pop("role",None)
             if "Guest#" in session["username"]: #deletes guest from user table and logs them out
