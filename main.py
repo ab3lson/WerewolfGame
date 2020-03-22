@@ -36,8 +36,8 @@ def get_db():
 
 def apply_role(role,playerList):
     while True: #will loop until a role is assigned
-        # randomPlayer = random.randrange(0,len(playerList)) #real code
-        randomPlayer = random.randrange(0,3) #assigns first three players the roles
+        randomPlayer = random.randrange(0,len(playerList)) #real code
+        # randomPlayer = random.randrange(0,3) #assigns first three players the roles
         if playerList[randomPlayer]["role"] == "villager":
             playerList[randomPlayer]["role"] = role
             print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
