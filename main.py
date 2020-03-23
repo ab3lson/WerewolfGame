@@ -36,22 +36,30 @@ def get_db():
 
 def apply_role(role,playerList):
     while True: #will loop until a role is assigned
-        # randomPlayer = random.randrange(0,len(playerList)) #real code
+        #randomPlayer = random.randrange(0,len(playerList)) #real code
         randomPlayer = random.randrange(0,3) #assigns first three players the roles
         if playerList[randomPlayer]["role"] == "villager":
             playerList[randomPlayer]["role"] = role
             print("ASSIGNMENT: {} will be a: {}".format(playerList[randomPlayer]["username"],playerList[randomPlayer]["role"]))
+            cur = get_db().cursor()
+            if role == "seer":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesSeer=TimesSeer+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            elif role == "headWerewolf" or role == "werewolf":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesWerewolf=TimesWerewolf+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            elif role == "healer":
+                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET TimesDoctor=TimesDoctor+1 WHERE Username = %s",(playerList[randomPlayer]["username"]))
+            cur.close()
             break
 
 def assign_roles(game):
     #logic to assign roles based on rules
     # print("Players and roles before assignments:",game["gameLogic"])
     # print("PLAYERS NEEDED:",int(game["playersNeeded"]))
-    if 6<= int(game["playersNeeded"]) <=9:
+    if 1<= int(game["playersNeeded"]) <=7: ##change back to 6-9
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
         apply_role("healer",game["gameLogic"])
-    if 10<= int(game["playersNeeded"]) <=13:
+    if 8<= int(game["playersNeeded"]) <=13: ##change back to 10-13
         apply_role("headWerewolf",game["gameLogic"])
         apply_role("werewolf",game["gameLogic"])
         apply_role("seer",game["gameLogic"])
@@ -148,7 +156,7 @@ def guestlogin():
     cur.execute("SELECT MAX(UserId) AS HighestID FROM User")
     highestId = cur.fetchone()
     guestId = int(highestId["HighestID"]) + 1
-    cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '0', '1')",('Guest#{}'.format(guestId),random.getrandbits(128)))
+    cur.execute("INSERT INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '1', '1')",('Guest#{}'.format(guestId),random.getrandbits(128)))
     cur.execute("SELECT UserId FROM User WHERE Username =%s",('Guest#{}'.format(guestId)))
     UserId = cur.fetchone()
     cur.close()
@@ -176,7 +184,8 @@ def stats():
                 return render_template("game.html",error=error)
             # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
             return render_template("stats.html",stats=stats)
-    except:
+    except Exception as e:
+        print("**ERROR in stats route:",e)
         return redirect("/")
 
 @app.route("/search", methods=["POST"])
@@ -191,7 +200,8 @@ def search():
             search = result[0]
             # return render_template("stats.html",gamesPlayed=stats["GamesPlayed"],gamesWon=stats["gamesWon"],peopleEaten=stats["peopleEaten"])
             return render_template("search.html",search=search)
-    except:
+    except Exception as e:
+        print("**ERROR in search route:",e)
         return redirect("/")
 
 @app.route("/signout")
@@ -243,6 +253,35 @@ def createAccount():
             session['loggedIn'] = 1
             cur.close()
             return redirect("game")
+
+@app.route("/settings",methods=['POST'])
+def settings():
+    try:
+        if session["loggedIn"]:
+            if request.form["password"] != request.form["confirmPassword"]:
+                return render_template("settings.html",error="badPassword")
+            cur = get_db().cursor()
+            cur.execute("SELECT * FROM User WHERE Username = %s",(request.form['username']))
+            result = cur.fetchall()
+            cur.close()
+            if len(result) != 0: #the username already exists in the db
+                return render_template("settings.html",error="badUsername")
+            else:
+                hashedPass = hashlib.md5((request.form["password"] + SALT).encode()).hexdigest()
+                cur = get_db().cursor()
+                try: #with email
+                    cur.execute("UPDATE INTO User (Username, Password, Email, LoggedIn) VALUES (%s, %s, %s, '1')",(request.form['username'],hashedPass,request.form['email']))
+                except: #without email
+                    cur.execute("UPDATE INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '1')",(request.form['username'],hashedPass))
+                cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
+                result = cur.fetchall()
+                cur.execute("UPDATE INTO Stats (UserId) VALUES (%s)",(result[0]["UserId"]))
+                session["userId"] = result[0]["UserId"]
+                session["username"] = request.form["username"]
+                session['loggedIn'] = 1
+                cur.close()
+                return redirect("game")
+
 
 @app.route("/game")
 def game():
@@ -338,6 +377,9 @@ def lobby():
                         assign_roles(game) #assigns roles to players
                         create_active_game(game) #adds players to ActiveGames table in DB
                 print(f"Player count reached for {session['roomId']}... REDIRECTING!")
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM Lobby WHERE RoomId =  %s",(session["roomId"])) #deletes game from lobby table
+                cur.close()
                 socketio.emit('start game', room=session["roomId"])
                 return redirect("pregame")
             else:
@@ -450,6 +492,11 @@ def nighttime():
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     for player in game["gameLogic"]:
+                        if player["username"] == session["username"]:
+                            session["role"] = player["role"] #updates roles if werewolf got promoted to headWerewolf
+            for game in GAMES:
+                if session["roomId"] == game["roomId"]:
+                    for player in game["gameLogic"]:
                         if player["username"] == session["username"] and player["role"] == "headWerewolf" and player["specialUsed"] == "1":
                             socketio.emit('wake up', room=session["roomId"])
                             return redirect("/daytime")
@@ -480,6 +527,13 @@ def nighttime():
                 return render_template("gameViews/nighttime.html")
         else:
             #redirect to home, because the player is dead
+            session.pop("roomId",None) #deletes game session variables
+            session.pop("role",None)
+            if "Guest#" in session["username"]: #deletes guest from user table and logs them out
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM User WHERE Username =  %s",(session["username"]))
+                cur.close()
+                session.clear()
             return redirect("/")
     except:
         return redirect("/login")
@@ -493,11 +547,12 @@ def specialRole():
         userList = None
         for game in GAMES:
             if session["roomId"] == game["roomId"]:
+                decisionTimer = game["decisionTimer"]
                 userList=game["gameLogic"]
                 for player in game["gameLogic"]:
                     if session["username"] == player["username"]:
                         player["specialUsed"]="1"
-        return render_template("gameViews/specialRole.html",playerNames=userList,role=session["role"])
+        return render_template("gameViews/specialRole.html",playerNames=userList,role=session["role"], decisionTimer=decisionTimer)
         
     except Exception as e:
         print("**ERROR in specialRole route:",e)
@@ -533,6 +588,36 @@ def results():
             for game in GAMES:
                 if session["roomId"] == game["roomId"]:
                     winType = checkWinConditions(game["gameLogic"])
+                    if session["role"] == "headWerewolf": #only updates the stats once (ghetto but it works)
+                        for player in game["gameLogic"]: #increments games played
+                            cur = get_db().cursor()
+                            cur.execute("DELETE FROM ActiveGames WHERE Username = %s",(player["username"])) #deletes players from ActiveGames
+                            cur.close()
+                            if "Guest#" not in player["username"]:
+                                cur = get_db().cursor()
+                                cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesPlayed=GamesPlayed+1 WHERE Username = %s",(player["username"]))
+                                cur.close()
+                        if winType == "Villagers": #increments games won if villagers won
+                            for player in game["gameLogic"]:
+                                if "Guest#" not in player["username"]:
+                                    if (player["role"] is not "werewolf" or player["role"] is not "headWerewolf")  and player["isAlive"] == "1":
+                                        cur = get_db().cursor()
+                                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
+                                        cur.close()
+                        elif winType == "Werewolves": #increments games won if werewolves won
+                            for player in game["gameLogic"]:
+                                if "Guest#" not in player["username"]:
+                                    if (player["role"] == "headWerewolf" or player["role"] == "werewolf") and player["isAlive"] == "1":
+                                        cur = get_db().cursor()
+                                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET GamesWon=GamesWon+1 WHERE Username = %s",(player["username"]))
+                                        cur.close()
+            session.pop("roomId",None) #deletes game session variables
+            session.pop("role",None)
+            if "Guest#" in session["username"]: #deletes guest from user table and logs them out
+                cur = get_db().cursor()
+                cur.execute("DELETE FROM User WHERE Username =  %s",(session["username"]))
+                cur.close()
+                session.clear()
             return render_template("gameViews/results.html",winType = winType)
     except Exception as e:
         print("***ERROR: error in results route:",e)
@@ -605,10 +690,16 @@ def healPlayer(username, roomId):
                     player["chosenByHealer"] = "1"
 
 @socketio.on('player to kill')
-def killPlayer(username, roomId):
+def killPlayer(username, roomId, werewolfName):
     print(f"The werewolf chose to kill: {username}!")
     join_room(roomId)
     userList = None
+    healerName = ""
+    for game in GAMES:
+        if session["roomId"] == game["roomId"]:
+            for player in game["gameLogic"]:
+                if player["role"] == "healer":
+                    healerName = player["username"]
     for game in GAMES:
         if session["roomId"] == game["roomId"]:
             for player in game["gameLogic"]:
@@ -616,8 +707,20 @@ def killPlayer(username, roomId):
                     if player["chosenByHealer"] != "1":
                         player["isAlive"] = "0"
                         print(f"{username} was killed by the werewolf!")
+                        if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
+                            print("THE HEAD WEREWOLF DIED!!")
+                            for player in game["gameLogic"]:
+                                if player["role"] == "werewolf":
+                                    player["role"] = "headWerewolf"
+                                    break #exits loop once first werewolf is promoted
+                        cur = get_db().cursor()
+                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET PeopleEaten=PeopleEaten+1 WHERE Username = %s",(werewolfName))
+                        cur.close()
                     else:
                         print(f"{username} was saved by the healer!")
+                        cur = get_db().cursor()
+                        cur.execute("UPDATE User RIGHT JOIN Stats ON User.UserId=Stats.UserId SET PeopleSaved=PeopleSaved+1 WHERE Username = %s",(healerName))
+                        cur.close()
 
 @socketio.on('cast vote')
 def castVote(username, roomId):
@@ -654,6 +757,12 @@ def castVote(username, roomId):
                         player["killVotes"] = 0
                         if player["username"] == voteToKill:
                             player["isAlive"] = "0"
+                            if player["role"] == "headWerewolf": #checks if there is a werewolf to promote to head werewolf
+                                print("THE HEAD WEREWOLF DIED!!")
+                                for player in game["gameLogic"]:
+                                    if player["role"] == "werewolf":
+                                        player["role"] = "headWerewolf"
+                                        break #exits loop once first werewolf is promoted
         print(f"{voteToKill} has been killed by the vote!")
         print("All players are have cast their vote! Changing screens...")
         emit("next screen", room=session["roomId"])
@@ -675,8 +784,6 @@ def seerStart():
                 else:
                     emit("seer event", room=session["roomId"])
     
-    
-
 @socketio.on('start werewolf event')
 def werewolfStart():
     print("Starting werewolf event!")
@@ -691,7 +798,6 @@ def wakeUp():
         emit("wake up", room=session["roomId"])
     except Exception as e:
         print("ERROR:",e)
-
 
 @app.errorhandler(404)
 def page_not_found(error):
