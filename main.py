@@ -254,6 +254,35 @@ def createAccount():
             cur.close()
             return redirect("game")
 
+@app.route("/settings",methods=['POST'])
+def settings():
+    try:
+        if session["loggedIn"]:
+            if request.form["password"] != request.form["confirmPassword"]:
+                return render_template("settings.html",error="badPassword")
+            cur = get_db().cursor()
+            cur.execute("SELECT * FROM User WHERE Username = %s",(request.form['username']))
+            result = cur.fetchall()
+            cur.close()
+            if len(result) != 0: #the username already exists in the db
+                return render_template("settings.html",error="badUsername")
+            else:
+                hashedPass = hashlib.md5((request.form["password"] + SALT).encode()).hexdigest()
+                cur = get_db().cursor()
+                try: #with email
+                    cur.execute("UPDATE INTO User (Username, Password, Email, LoggedIn) VALUES (%s, %s, %s, '1')",(request.form['username'],hashedPass,request.form['email']))
+                except: #without email
+                    cur.execute("UPDATE INTO User (Username, Password, IsGuest, LoggedIn) VALUES (%s, %s, '1')",(request.form['username'],hashedPass))
+                cur.execute("SELECT UserId FROM User WHERE Username = %s",(request.form['username']))
+                result = cur.fetchall()
+                cur.execute("UPDATE INTO Stats (UserId) VALUES (%s)",(result[0]["UserId"]))
+                session["userId"] = result[0]["UserId"]
+                session["username"] = request.form["username"]
+                session['loggedIn'] = 1
+                cur.close()
+                return redirect("game")
+
+
 @app.route("/game")
 def game():
     try:
